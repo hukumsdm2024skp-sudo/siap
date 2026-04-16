@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIAP – Sistem Informasi Absensi Pegawai KPU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1565c0;--blue-light:#1976d2;--blue-dark:#0d47a1;--kpu-red:#c62828;--kpu-red-light:#e53935;--accent:#f9a825;--cyan:#0097a7;--green:#2e7d32;--green-light:#43a047;--red:#c62828;--orange:#e65100;--purple:#6a1b9a;--bg:#f0f4fb;--surface:#ffffff;--border:#e2e8f0;--text:#1e293b;--text-muted:#64748b;--sidebar-w:248px;--radius:14px;--shadow:0 2px 16px rgba(21,101,192,.08);--shadow-lg:0 8px 32px rgba(21,101,192,.16)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.page{display:none}.page.active{display:block}.page.hidden{display:none!important}
+
+/* LOGIN */
+.login-bg{position:fixed;inset:0;background:linear-gradient(145deg,#0a1628 0%,#1a237e 35%,#283593 65%,#b71c1c 100%);overflow:hidden}
+.login-orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.2}
+.orb1{width:520px;height:520px;background:#3949ab;top:-220px;left:-120px}
+.orb2{width:420px;height:420px;background:#c62828;bottom:-160px;right:-100px}
+.orb3{width:320px;height:320px;background:#f9a825;top:45%;left:48%;transform:translate(-50%,-50%)}
+.login-container{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;gap:1.5rem}
+.login-brand{text-align:center;color:#fff}
+.kpu-logo-wrap{display:flex;justify-content:center;margin-bottom:1.25rem}
+.kpu-logo-real{width:145px;height:145px;object-fit:contain;filter:drop-shadow(0 6px 24px rgba(0,0,0,.55))}
+.brand-title{font-size:2.8rem;font-weight:800;letter-spacing:6px;font-family:'Space Mono',monospace;margin-bottom:.2rem;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.brand-subtitle{font-size:.95rem;opacity:.85}
+.brand-inst{font-size:.82rem;opacity:.65;letter-spacing:1px;margin-top:.2rem;font-weight:600}
+.login-card{background:rgba(255,255,255,.97);border-radius:20px;padding:2rem 2.25rem;width:100%;max-width:420px;box-shadow:0 24px 72px rgba(0,0,0,.35)}
+.login-card-header{display:flex;align-items:center;gap:.75rem;font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid var(--border)}
+.login-card-logo{width:36px;height:36px;object-fit:contain}
+.btn-login-main{margin-top:.5rem;background:linear-gradient(135deg,var(--kpu-red),var(--kpu-red-light))}
+.btn-login-main:hover{box-shadow:0 6px 24px rgba(198,40,40,.4)}
+
+/* CLOUD SETUP PANEL */
+.cloud-setup{background:#fff8e1;border:2px solid #ffe082;border-radius:16px;padding:1.5rem;margin-bottom:1.25rem}
+.cloud-setup h3{font-size:.95rem;font-weight:800;color:#e65100;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.cloud-setup p{font-size:.82rem;color:#5d4037;line-height:1.6;margin-bottom:.75rem}
+.cloud-setup input{width:100%;padding:.65rem 1rem;border:2px solid #ffe082;border-radius:8px;font-family:inherit;font-size:.85rem;margin-bottom:.5rem}
+.cloud-setup input:focus{outline:none;border-color:#f9a825}
+.btn-cloud{background:linear-gradient(135deg,#f9a825,#ff8f00);color:#1a237e;border:none;border-radius:8px;padding:.6rem 1.2rem;font-family:inherit;font-size:.85rem;font-weight:800;cursor:pointer;width:100%}
+.btn-skip-cloud{background:none;color:var(--text-muted);border:1.5px solid var(--border);border-radius:8px;padding:.55rem 1rem;font-family:inherit;font-size:.82rem;cursor:pointer;width:100%;margin-top:.5rem}
+
+/* KAMERA SELFIE */
+.selfie-section{background:var(--bg);border-radius:12px;padding:1rem;margin-top:.75rem;border:2px dashed var(--border)}
+.selfie-section.active{border-color:var(--blue);background:#f0f4ff}
+.selfie-preview-wrap{position:relative;width:100%;max-width:340px;margin:0 auto .75rem}
+#selfie-video{width:100%;border-radius:10px;display:block;background:#000;max-height:220px;object-fit:cover}
+#selfie-canvas{display:none}
+.selfie-thumb{width:100%;border-radius:10px;max-height:180px;object-fit:cover;border:3px solid var(--green);display:none;margin-top:.5rem}
+.selfie-thumb.show{display:block}
+.selfie-controls{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.5rem}
+.btn-selfie{display:flex;align-items:center;gap:.4rem;padding:.55rem 1rem;border-radius:8px;border:none;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-selfie.open{background:linear-gradient(135deg,#0097a7,#00acc1);color:#fff}
+.btn-selfie.capture{background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff}
+.btn-selfie.retake{background:linear-gradient(135deg,#e65100,#ff6d00);color:#fff}
+.btn-selfie.close-cam{background:#f1f3f5;color:var(--text-muted);border:1.5px solid var(--border)}
+.btn-selfie:disabled{opacity:.4;cursor:not-allowed}
+.selfie-status{text-align:center;font-size:.75rem;color:var(--text-muted);margin-top:.4rem}
+.selfie-status.ok{color:var(--green);font-weight:700}
+.selfie-status.err{color:var(--kpu-red);font-weight:700}
+
+/* BUTTONS */
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue-light));color:#fff;border:none;border-radius:10px;padding:.75rem 1.5rem;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(21,101,192,.35)}
+.btn-primary.full{width:100%}
+.btn-outline{background:transparent;color:var(--blue);border:2px solid var(--blue);border-radius:10px;padding:.65rem 1.2rem;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-outline:hover{background:var(--blue);color:#fff}
+.btn-google{background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;border:none;border-radius:10px;padding:.65rem 1.2rem;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-logout-sidebar{background:none;border:none;font-size:1.2rem;cursor:pointer;opacity:.5;transition:opacity .2s;color:inherit}
+.btn-logout-sidebar:hover{opacity:1}
+.btn-topbar-logout{display:flex;align-items:center;gap:.4rem;background:#fff3f3;color:var(--kpu-red);border:1.5px solid #ffcdd2;border-radius:8px;padding:.45rem .9rem;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-topbar-logout:hover{background:var(--kpu-red);color:#fff;border-color:var(--kpu-red)}
+.btn-logout-profil{background:#fff3f3;color:var(--kpu-red);border:2px solid #ffcdd2;border-radius:10px;padding:.65rem 1.2rem;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;text-align:center}
+.btn-logout-profil:hover{background:var(--kpu-red);color:#fff;border-color:var(--kpu-red)}
+.btn-toggle-sidebar{background:none;border:none;font-size:1.4rem;cursor:pointer;padding:.3rem;color:var(--text-muted)}
+
+/* APP LAYOUT */
+#page-app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s;box-shadow:2px 0 16px rgba(0,0,0,.06)}
+.sidebar.collapsed{transform:translateX(calc(-1 * var(--sidebar-w)))}
+.sidebar-brand{display:flex;align-items:center;gap:.75rem;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border)}
+.sidebar-kpu-logo-img{width:34px;height:34px;object-fit:contain;flex-shrink:0;border-radius:4px}
+.topbar-kpu-logo-img{width:22px;height:22px;object-fit:contain;border-radius:3px}
+.brand-text-wrap{display:flex;flex-direction:column}
+.brand-main{font-family:'Space Mono',monospace;font-weight:700;font-size:1.1rem;letter-spacing:2px;color:var(--blue);line-height:1}
+.brand-sub-small{font-size:.65rem;font-weight:700;letter-spacing:2px;color:var(--kpu-red);margin-top:.1rem}
+.sidebar-nav{flex:1;padding:.75rem .6rem;display:flex;flex-direction:column;gap:.15rem;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-radius:10px;border:none;background:none;font-family:inherit;font-size:.875rem;color:var(--text-muted);cursor:pointer;transition:all .2s;text-align:left;width:100%}
+.nav-item:hover{background:#f0f4ff;color:var(--blue)}
+.nav-item.active{background:linear-gradient(135deg,#e3eaff,#dce4ff);color:var(--blue);font-weight:700;box-shadow:inset 3px 0 0 var(--blue)}
+.nav-icon{font-size:1rem;flex-shrink:0}
+.sidebar-user{padding:.9rem 1.1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.65rem}
+.sidebar-user img{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;cursor:pointer}
+.sidebar-user-info{flex:1;min-width:0}
+.s-name{font-size:.82rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s-role{font-size:.7rem;color:var(--blue);font-weight:600}
+.main-content{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;transition:margin-left .3s;min-height:100vh}
+.main-content.expanded{margin-left:0}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.topbar-kpu-brand{display:flex;align-items:center;gap:.4rem;padding:.3rem .8rem;background:#fff3f3;border-radius:8px}
+.topbar-kpu-text{font-size:.75rem;font-weight:800;color:var(--kpu-red);letter-spacing:1px}
+.topbar-title{font-weight:700;font-size:1rem;flex:1;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:.75rem;flex-shrink:0}
+.clock{font-family:'Space Mono',monospace;font-size:.95rem;font-weight:700;color:var(--blue)}
+.date-badge{background:#e8edff;color:var(--blue);border-radius:20px;padding:.28rem .8rem;font-size:.75rem;font-weight:600}
+
+/* SECTIONS */
+.section{display:none;padding:1.5rem;animation:fadeIn .3s}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-size:1.15rem;font-weight:800;margin-bottom:1.25rem;color:var(--text)}
+
+/* CARDS */
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:.95rem;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+
+/* WELCOME BANNER */
+.welcome-banner{background:linear-gradient(135deg,#1a237e 0%,#283593 50%,#1565c0 100%);border-radius:var(--radius);padding:1.75rem;color:#fff;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center}
+.welcome-kpu-badge{background:rgba(249,168,37,.2);border:1px solid rgba(249,168,37,.4);color:#f9a825;border-radius:20px;padding:.25rem .75rem;font-size:.72rem;font-weight:800;letter-spacing:1px;display:inline-block;margin-bottom:.5rem}
+.welcome-sub{font-size:.82rem;opacity:.75}
+.welcome-name{font-size:1.35rem;font-weight:800;margin:.2rem 0}
+.welcome-unit{font-size:.8rem;opacity:.7}
+.welcome-date-info{text-align:right;opacity:.85;font-size:.88rem}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.25rem}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:1.25rem;text-align:center;border-left:4px solid;box-shadow:var(--shadow)}
+.stat-card.blue{border-color:var(--blue)}.stat-card.red{border-color:var(--kpu-red)}.stat-card.orange{border-color:var(--orange)}.stat-card.green{border-color:var(--green)}
+.stat-icon{font-size:1.4rem;margin-bottom:.2rem}
+.stat-val{font-size:2rem;font-weight:800;font-family:'Space Mono',monospace}
+.stat-lbl{font-size:.74rem;color:var(--text-muted);font-weight:600;margin-top:.1rem}
+
+/* FORM */
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.7rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:.9rem;transition:border-color .2s,box-shadow .2s;background:#fff;color:var(--text)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px rgba(21,101,192,.1)}
+.form-group textarea{resize:vertical}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1rem}
+.input-pw{position:relative}
+.input-pw input{padding-right:3rem}
+.pw-toggle{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem}
+.login-error{color:var(--kpu-red);font-size:.85rem;margin-bottom:1rem;padding:.6rem 1rem;background:#fff5f5;border-radius:8px;border-left:3px solid var(--kpu-red)}
+.field-hint{font-size:.75rem;color:var(--text-muted);display:block;margin-top:.3rem}
+
+/* ATTENDANCE */
+.attendance-times{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.time-box{flex:1;min-width:100px;background:var(--bg);border-radius:10px;padding:1rem;text-align:center}
+.time-label{font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.time-val{font-size:1.35rem;font-weight:700;font-family:'Space Mono',monospace;color:var(--blue);margin-top:.25rem}
+.time-divider{font-size:1.2rem;color:var(--text-muted)}
+.absen-buttons{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}
+.btn-absen{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem;border-radius:12px;border:none;font-family:inherit;font-size:.875rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.btn-absen.masuk{background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff}
+.btn-absen.siang{background:linear-gradient(135deg,#f57f17,#f9a825);color:#fff}
+.btn-absen.pulang{background:linear-gradient(135deg,#b71c1c,#c62828);color:#fff}
+.btn-absen:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.btn-absen:disabled{opacity:.38;cursor:not-allowed;transform:none}
+.absen-msg{padding:.75rem 1rem;border-radius:10px;font-weight:600;font-size:.875rem}
+.absen-msg.success{background:#e8f5e9;color:#1b5e20;border-left:4px solid #43a047}
+.absen-msg.error{background:#ffebee;color:#b71c1c;border-left:4px solid #e53935}
+
+/* GPS */
+.gps-card .gps-info{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;font-size:.85rem;color:var(--text-muted)}
+.gps-addr{flex-basis:100%}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:2rem 1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:#fafcff}
+.upload-zone:hover{border-color:var(--blue);background:#f0f4ff}
+.upload-icon{font-size:2rem;margin-bottom:.5rem}
+.upload-text{font-size:.88rem;color:var(--text-muted);line-height:1.6}
+.upload-text small{font-size:.75rem}
+.file-name-display{margin-top:.6rem;padding:.6rem 1rem;background:#e8f5e9;border-radius:8px;font-size:.85rem;color:#1b5e20;font-weight:600;border-left:3px solid #43a047;display:flex;align-items:center;gap:.5rem}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:.83rem}
+.tbl th{background:var(--bg);padding:.65rem .9rem;text-align:left;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap}
+.tbl td{padding:.65rem .9rem;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:hover td{background:#f8faff}
+.tbl tr:last-child td{border-bottom:none}
+
+/* BADGES */
+.badge{padding:.22rem .65rem;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.badge-gray{background:#f1f3f5;color:#495057}
+.badge-green{background:#e8f5e9;color:#1b5e20}
+.badge-red{background:#ffebee;color:#b71c1c}
+.badge-orange{background:#fff3e0;color:#e65100}
+.badge-blue{background:#e3f2fd;color:#1565c0}
+.badge-yellow{background:#fffde7;color:#f57f17}
+.role-badge{padding:.28rem .85rem;border-radius:20px;font-size:.7rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;font-family:'Space Mono',monospace;flex-shrink:0}
+.role-badge.admin{background:linear-gradient(135deg,#f9a825,#ff8f00);color:#1a237e;box-shadow:0 2px 8px rgba(249,168,37,.4)}
+.role-badge.pegawai{background:linear-gradient(135deg,#0097a7,#00acc1);color:#fff;box-shadow:0 2px 8px rgba(0,151,167,.3)}
+
+/* ADMIN THEME */
+[data-role="admin"] .sidebar{background:linear-gradient(180deg,#1a237e 0%,#283593 55%,#1565c0 100%);border-right:none;box-shadow:3px 0 20px rgba(26,35,126,.3)}
+[data-role="admin"] .sidebar-brand{color:#f9a825;border-bottom-color:rgba(255,255,255,.12)}
+[data-role="admin"] .brand-main{color:#f9a825}
+[data-role="admin"] .brand-sub-small{color:rgba(255,255,255,.6)}
+[data-role="admin"] .nav-item{color:rgba(255,255,255,.65)}
+[data-role="admin"] .nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
+[data-role="admin"] .nav-item.active{background:rgba(249,168,37,.15);color:#f9a825;box-shadow:inset 3px 0 0 #f9a825}
+[data-role="admin"] .sidebar-user{border-top-color:rgba(255,255,255,.12)}
+[data-role="admin"] .s-name{color:#fff}
+[data-role="admin"] .s-role{color:#f9a825}
+[data-role="admin"] .btn-logout-sidebar{color:rgba(255,255,255,.55)}
+[data-role="admin"] .btn-logout-sidebar:hover{color:#f9a825;opacity:1}
+[data-role="admin"] .welcome-banner{background:linear-gradient(135deg,#1a237e,#283593,#0d47a1)}
+[data-role="pegawai"] .nav-item.active{background:linear-gradient(135deg,#e0f7fa,#b2ebf2);color:#006064;box-shadow:inset 3px 0 0 #00897b}
+[data-role="pegawai"] .welcome-banner{background:linear-gradient(135deg,#0277bd,#0288d1,#0097a7)}
+
+/* GPS COORD */
+.gps-coord-link{display:inline-block;text-decoration:none;background:#f0f7ff;border:1px solid #bbdefb;border-radius:8px;padding:.35rem .6rem;transition:all .2s;line-height:1.5}
+.gps-coord-link:hover{background:#e3f2fd;border-color:#64b5f6;transform:translateY(-1px)}
+.gps-num{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--blue);font-weight:700;display:block}
+.durasi-chip{background:#e8f5e9;color:#1b5e20;border-radius:6px;padding:.2rem .5rem;font-family:'Space Mono',monospace;font-size:.75rem;font-weight:700}
+.td-time{font-family:'Space Mono',monospace;font-size:.82rem;font-weight:700}
+.drive-chip{display:inline-flex;align-items:center;gap:.3rem;background:#e3f2fd;color:#1565c0;border-radius:6px;padding:.2rem .55rem;font-size:.72rem;font-weight:700;text-decoration:none}
+.drive-chip:hover{background:#bbdefb}
+
+/* FILTER */
+.filter-row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.filter-row input,.filter-row select{flex:1;min-width:130px;padding:.55rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.83rem}
+.inp-search{flex:2}
+
+/* PROFIL */
+.profil-grid{display:grid;grid-template-columns:300px 1fr;gap:1.25rem;align-items:start}
+.profil-avatar-wrap{text-align:center;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1rem}
+.avatar-upload-btn{position:relative;display:inline-block;cursor:pointer}
+.avatar-upload-btn:hover .avatar-hover{opacity:1}
+.profil-avatar{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--blue);margin-bottom:.75rem;display:block;margin-left:auto;margin-right:auto}
+.avatar-hover{position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(21,101,192,.85);color:#fff;font-size:.65rem;font-weight:700;border-radius:12px;padding:.2rem .6rem;opacity:0;transition:opacity .2s;white-space:nowrap}
+.profil-name{font-size:1.1rem;font-weight:800}
+.profil-role{font-size:.78rem;color:var(--blue);font-weight:600}
+.info-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem;gap:1rem}
+.info-row span:first-child{color:var(--text-muted);font-weight:600;flex-shrink:0}
+.info-row span:last-child{font-weight:700;text-align:right}
+.admin-quick{display:flex;gap:.75rem;flex-wrap:wrap}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--surface);border-radius:18px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,.35);animation:modalIn .2s}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);font-weight:700;font-size:1rem}
+.modal-close{background:none;border:none;font-size:1.2rem;cursor:pointer;opacity:.6}
+.modal-close:hover{opacity:1}
+.modal-body{padding:1.5rem}
+.modal-footer{display:flex;justify-content:flex-end;gap:.75rem;padding:1.2rem 1.5rem;border-top:1px solid var(--border)}
+
+/* AVATAR IN MODAL */
+.modal-avatar-row{display:flex;align-items:center;gap:1.25rem;background:var(--bg);border-radius:12px;padding:1rem;margin-bottom:1rem}
+.modal-avatar-img{width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--blue);flex-shrink:0}
+.modal-avatar-btns{display:flex;flex-direction:column;gap:.4rem}
+.btn-upload-foto{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:.45rem .9rem;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer}
+.btn-reset-foto{background:none;color:var(--text-muted);border:1.5px solid var(--border);border-radius:7px;padding:.4rem .8rem;font-family:inherit;font-size:.75rem;cursor:pointer}
+
+/* GDRIVE */
+.gdrive-info{text-align:center;padding:.75rem 0 1rem}
+.gdrive-icon{font-size:2.5rem;margin-bottom:.5rem}
+.gdrive-info p{font-size:.88rem;line-height:1.6;color:var(--text-muted)}
+.gdrive-note{color:#f57f17!important;font-weight:600!important;margin-top:.5rem!important}
+.info-box-blue{background:#f0f7ff;border:1px dashed var(--blue);border-radius:10px;padding:1rem;margin-top:1rem}
+.info-box-blue ol{margin:.5rem 0 0 1.2rem;font-size:.83rem;line-height:1.9}
+
+/* TOAST & SYNC */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:999;background:#1e293b;color:#fff;padding:.85rem 1.5rem;border-radius:12px;font-size:.875rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.3);animation:slideUp .3s;max-width:340px}
+.toast.hidden{display:none}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sync-strip{position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.35rem;font-size:.75rem;font-weight:700;transition:all .3s;transform:translateY(-100%)}
+.sync-strip.show{transform:translateY(0)}
+.sync-strip.loading{background:linear-gradient(90deg,#1565c0,#1976d2);color:#fff}
+.sync-strip.success{background:#2e7d32;color:#fff}
+.sync-strip.error{background:#b71c1c;color:#fff}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.8);animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* CLOUD STATUS */
+.cloud-status-bar{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:8px;font-size:.78rem;font-weight:600;margin-bottom:.75rem}
+.cloud-status-bar.online{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.cloud-status-bar.offline{background:#fff8e1;color:#e65100;border:1px solid #ffe082}
+.cloud-status-bar.local{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+
+/* LAPORAN FOTO */
+.lap-foto-cell{text-align:center;vertical-align:middle}
+.lap-foto-cell{text-align:center;vertical-align:middle;padding:4px 6px!important}
+.lap-foto-cell img,.selfie-lap-img{width:42px;height:42px;border-radius:8px;object-fit:cover;cursor:pointer;border:2.5px solid #43a047;transition:transform .18s,box-shadow .18s;display:block;margin:auto}
+.lap-foto-cell img:hover,.selfie-lap-img:hover{transform:scale(1.18);box-shadow:0 4px 14px rgba(46,125,50,.4)}
+.lap-foto-empty{width:42px;height:42px;border-radius:8px;background:#f1f3f5;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--text-muted)}
+
+/* UTIL */
+.mt1{margin-top:1rem}.mb1{margin-bottom:1rem}.hidden{display:none!important}.full{width:100%}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.profil-grid{grid-template-columns:1fr}.absen-buttons{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.topbar-kpu-brand{display:none}}
+@media(max-width:640px){.sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}.sidebar.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.3)}.main-content{margin-left:0}.stats-grid{grid-template-columns:repeat(2,1fr)}.attendance-times{flex-direction:column}.time-divider{transform:rotate(90deg)}.topbar-right .date-badge{display:none}.absen-buttons{grid-template-columns:1fr}}
+.empty-row{text-align:center;padding:2rem;color:var(--text-muted);font-style:italic}
+</style>
+</head>
+<body>
+
+<!-- SYNC STRIP -->
+<div id="sync-strip" class="sync-strip"><div class="sync-dot" id="sd"></div><span id="st">Menyinkronkan...</span></div>
+
+<!-- ═══ LOGIN PAGE ═══ -->
+<div id="page-login" class="page active">
+  <div class="login-bg">
+    <div class="login-orb orb1"></div><div class="login-orb orb2"></div><div class="login-orb orb3"></div>
+  </div>
+  <div class="login-container">
+    <div class="login-brand">
+      <div class="kpu-logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Lambang_KPU.svg/200px-Lambang_KPU.svg.png" class="kpu-logo-real" alt="KPU" onerror="this.style.display='none'">
+      </div>
+      <h1 class="brand-title">SIAP</h1>
+      <p class="brand-subtitle">Sistem Informasi Absensi Pegawai</p>
+      <p class="brand-inst">Komisi Pemilihan Umum</p>
+    </div>
+
+    <!-- CLOUD SETUP - muncul pertama kali -->
+    <div id="cloud-setup-panel" class="cloud-setup" style="width:100%;max-width:420px;display:none">
+      <h3>☁️ Setup Penyimpanan Cloud</h3>
+      <p>Agar data bisa diakses dari browser manapun, masukkan <b>JSONBin.io API Key</b> dan <b>Bin ID</b>. Gratis di <a href="https://jsonbin.io" target="_blank" style="color:#e65100">jsonbin.io</a>.</p>
+      <p><b>Cara cepat:</b> Daftar → buat Bin baru → salin API Key & Bin ID</p>
+      <input type="text" id="setup-apikey" placeholder="API Key: $2a$10$xxxxxxxxxx..." autocomplete="off">
+      <input type="text" id="setup-binid" placeholder="Bin ID: 6xxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      <button class="btn-cloud" onclick="saveCloudConfig()">💾 Simpan & Gunakan Cloud</button>
+      <button class="btn-skip-cloud" onclick="useLocalMode()">→ Lewati, gunakan mode lokal saja</button>
+      <p style="font-size:.72rem;color:#8d6e63;margin-top:.5rem;text-align:center">Mode lokal = data hanya tersimpan di browser ini</p>
+    </div>
+
+    <div class="login-card" id="login-card">
+      <div class="login-card-header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Lambang_KPU.svg/200px-Lambang_KPU.svg.png" class="login-card-logo" alt="KPU" onerror="this.style.fontSize='.9rem';this.alt='🗳'">
+        <span>Masuk ke Sistem</span>
+      </div>
+      <div id="cloud-status-login" class="cloud-status-bar local" style="display:none">
+        <span id="cloud-status-icon">💻</span><span id="cloud-status-text">Mode Lokal</span>
+        <button id="btn-atur-cloud" onclick="resetCloudSetup()" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:.75rem;color:var(--blue);font-weight:700;text-decoration:underline">⚙ Atur Cloud</button>
+      </div>
+      <div class="form-group">
+        <label>NIP / Username</label>
+        <input type="text" id="login-nip" placeholder="Masukkan NIP atau Username" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-pw">
+          <input type="password" id="login-pw" placeholder="Masukkan Password">
+          <button onclick="togglePw()" class="pw-toggle" type="button">👁</button>
+        </div>
+      </div>
+      <div id="login-error" class="login-error hidden">NIP / Password salah. Coba lagi.</div>
+      <button class="btn-primary full btn-login-main" onclick="doLogin()" type="button">🔐 MASUK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div id="page-app" class="page hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Lambang_KPU.svg/200px-Lambang_KPU.svg.png" class="sidebar-kpu-logo-img" alt="KPU" onerror="this.style.display='none'">
+      <div class="brand-text-wrap">
+        <span class="brand-main">SIAP</span>
+        <span class="brand-sub-small">KPU</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showSection('beranda')"><span class="nav-icon">🏠</span><span>Beranda</span></button>
+      <button class="nav-item" onclick="showSection('absensi')"><span class="nav-icon">📍</span><span>Absensi</span></button>
+      <button class="nav-item admin-only" id="nav-pegawai" onclick="showSection('pegawai')"><span class="nav-icon">👥</span><span>Data Pegawai</span></button>
+      <button class="nav-item pegawai-only" onclick="showSection('izin-cuti')"><span class="nav-icon">📅</span><span>Izin &amp; Cuti</span></button>
+      <button class="nav-item pegawai-only" onclick="showSection('dokumen')"><span class="nav-icon">📁</span><span>Dok. Kegiatan</span></button>
+      <button class="nav-item admin-only" onclick="showSection('izin-cuti')"><span class="nav-icon">📅</span><span>Kelola Izin/Cuti</span></button>
+      <button class="nav-item admin-only" onclick="showSection('dokumen')"><span class="nav-icon">📁</span><span>Dok. Pegawai</span></button>
+      <button class="nav-item" onclick="showSection('laporan')"><span class="nav-icon">📊</span><span>Laporan</span></button>
+      <button class="nav-item" onclick="showSection('profil')"><span class="nav-icon">👤</span><span>Profil</span></button>
+    </nav>
+    <div class="sidebar-user">
+      <img id="sidebar-avatar" src="" alt="avatar" onclick="showSection('profil')" title="Klik untuk profil">
+      <div class="sidebar-user-info">
+        <div id="sidebar-name" class="s-name">-</div>
+        <div id="sidebar-role" class="s-role">-</div>
+      </div>
+      <button onclick="doLogout()" title="Keluar" class="btn-logout-sidebar">⏏</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <button class="btn-toggle-sidebar" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-kpu-brand">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Lambang_KPU.svg/200px-Lambang_KPU.svg.png" class="topbar-kpu-logo-img" alt="KPU" onerror="this.style.display='none'">
+        <span class="topbar-kpu-text">KPU</span>
+      </div>
+      <div class="topbar-title" id="topbar-title">Beranda</div>
+      <div class="topbar-right">
+        <span id="role-badge" class="role-badge"></span>
+        <div class="clock" id="live-clock">--:--:--</div>
+        <div class="date-badge" id="live-date">-</div>
+        <button class="btn-topbar-logout" onclick="doLogout()">⏏ Keluar</button>
+      </div>
+    </div>
+
+    <!-- BERANDA -->
+    <section id="section-beranda" class="section active">
+      <div class="welcome-banner">
+        <div class="welcome-left">
+          <div class="welcome-kpu-badge">🗳 KPU</div>
+          <div class="welcome-sub">Selamat datang,</div>
+          <div class="welcome-name" id="welcome-name">-</div>
+          <div class="welcome-unit" id="welcome-unit">-</div>
+        </div>
+        <div class="welcome-date-info">
+          <div id="w-date">-</div><div id="w-day">-</div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-icon">✅</div><div class="stat-val" id="stat-hadir">0</div><div class="stat-lbl">Hari Hadir</div></div>
+        <div class="stat-card red"><div class="stat-icon">❌</div><div class="stat-val" id="stat-alpha">0</div><div class="stat-lbl">Alpha</div></div>
+        <div class="stat-card orange"><div class="stat-icon">🏖</div><div class="stat-val" id="stat-cuti">0</div><div class="stat-lbl">Cuti</div></div>
+        <div class="stat-card green"><div class="stat-icon">📋</div><div class="stat-val" id="stat-izin">0</div><div class="stat-lbl">Izin</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span>📍 Presensi Hari Ini</span><span id="today-status-badge" class="badge badge-gray">Belum Absen</span></div>
+        <div class="attendance-times">
+          <div class="time-box"><div class="time-label">JAM MASUK</div><div class="time-val" id="dash-masuk">--:--</div></div>
+          <div class="time-divider">→</div>
+          <div class="time-box"><div class="time-label">JAM SIANG</div><div class="time-val" id="dash-siang">--:--</div></div>
+          <div class="time-divider">→</div>
+          <div class="time-box"><div class="time-label">JAM PULANG</div><div class="time-val" id="dash-pulang">--:--</div></div>
+        </div>
+        <button class="btn-primary full mt1" onclick="showSection('absensi')">→ Ke Halaman Absensi</button>
+      </div>
+      <div class="card pegawai-only" id="quick-pegawai">
+        <div class="card-header"><span>⚡ Aksi Cepat</span></div>
+        <div class="admin-quick">
+          <button class="btn-outline" onclick="showSection('izin-cuti')">📅 Ajukan Izin / Cuti</button>
+          <button class="btn-outline" onclick="showSection('dokumen')">📁 Upload Dok. Kegiatan</button>
+          <button class="btn-outline" onclick="showSection('laporan')">📊 Lihat Presensi Saya</button>
+        </div>
+      </div>
+      <div class="card admin-only" id="admin-panel" style="display:none">
+        <div class="card-header"><span>⚡ Panel Administrator</span></div>
+        <div class="admin-quick">
+          <button class="btn-outline" onclick="showSection('pegawai')">👥 Kelola Pegawai</button>
+          <button class="btn-outline" onclick="showSection('laporan')">📊 Lihat Laporan</button>
+          <button class="btn-outline" onclick="showAllAbsensi()">📋 Semua Absensi</button>
+          <button class="btn-outline" onclick="showSection('izin-cuti')">📅 Kelola Izin/Cuti</button>
+          <button class="btn-outline" onclick="showSection('dokumen')">📁 Dok. Pegawai</button>
+          <button class="btn-outline" id="btn-relay-link" onclick="copyRelayLink()" style="display:none">🔗 Salin Link Akses Cloud</button>
+        </div>
+        <div id="all-absensi-panel" class="hidden mt1">
+          <table class="tbl">
+            <thead><tr><th>Nama</th><th>Tanggal</th><th>Jam Masuk</th><th>Jam Siang</th><th>Jam Pulang</th><th>Status</th></tr></thead>
+            <tbody id="all-absensi-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABSENSI -->
+    <section id="section-absensi" class="section">
+      <div class="section-title">📍 Absensi Kehadiran</div>
+      <div class="card gps-card">
+        <div class="card-header"><span>📡 Lokasi GPS</span><span id="gps-status" class="badge badge-gray">Mendeteksi...</span></div>
+        <div class="gps-info">
+          <div id="gps-lat">Latitude: -</div><div id="gps-lon">Longitude: -</div>
+          <div id="gps-acc">Akurasi: -</div><div id="gps-addr" class="gps-addr">Alamat: Mendeteksi...</div>
+        </div>
+        <button class="btn-outline mt1" onclick="getGPS()">🔄 Refresh Lokasi</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><span>⏱ Jam Absensi Hari Ini</span></div>
+        <div class="attendance-times">
+          <div class="time-box"><div class="time-label">JAM MASUK</div><div class="time-val" id="abs-masuk">--:--</div></div>
+          <div class="time-divider">→</div>
+          <div class="time-box"><div class="time-label">JAM SIANG</div><div class="time-val" id="abs-siang">--:--</div></div>
+          <div class="time-divider">→</div>
+          <div class="time-box"><div class="time-label">JAM PULANG</div><div class="time-val" id="abs-pulang">--:--</div></div>
+        </div>
+        <div class="absen-buttons mt1">
+          <button class="btn-absen masuk" id="btn-masuk" onclick="doAbsen('masuk')"><span>🟢</span> ABSEN MASUK</button>
+          <button class="btn-absen siang" id="btn-siang" onclick="doAbsen('siang')" disabled><span>🟡</span> JAM SIANG</button>
+          <button class="btn-absen pulang" id="btn-pulang" onclick="doAbsen('pulang')" disabled><span>🔴</span> ABSEN PULANG</button>
+        </div>
+        <div id="absen-msg" class="absen-msg hidden"></div>
+
+        <!-- SELFIE SECTION -->
+        <div class="selfie-section" id="selfie-section">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+            <span style="font-size:.82rem;font-weight:700;color:var(--text)">📸 Foto Selfie Absensi <span style="font-weight:400;color:var(--text-muted)">(opsional)</span></span>
+            <span id="selfie-status" class="selfie-status"></span>
+          </div>
+          <div class="selfie-preview-wrap">
+            <video id="selfie-video" autoplay playsinline style="display:none"></video>
+            <canvas id="selfie-canvas"></canvas>
+            <img id="selfie-thumb" class="selfie-thumb" alt="Foto absensi">
+          </div>
+          <div class="selfie-controls">
+            <button class="btn-selfie open" id="btn-open-cam" onclick="openCamera()">📷 Buka Kamera</button>
+            <button class="btn-selfie capture" id="btn-capture" onclick="capturePhoto()" style="display:none">🤳 Ambil Foto</button>
+            <button class="btn-selfie retake" id="btn-retake" onclick="retakePhoto()" style="display:none">🔄 Ulangi</button>
+            <button class="btn-selfie close-cam" id="btn-close-cam" onclick="closeCamera()" style="display:none">✕ Tutup</button>
+          </div>
+        </div>
+
+        <div class="form-group mt1"><label>Catatan (opsional)</label><textarea id="absen-catatan" rows="2" placeholder="Tambahkan catatan..."></textarea></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span>📋 Riwayat Absensi Bulan Ini</span></div>
+        <table class="tbl">
+          <thead><tr><th>Tanggal</th><th>Jam Masuk</th><th>Jam Siang</th><th>Jam Pulang</th><th>Status</th><th>📸</th></tr></thead>
+          <tbody id="riwayat-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DATA PEGAWAI -->
+    <section id="section-pegawai" class="section">
+      <div class="section-title">👥 Data Pegawai</div>
+      <div class="card">
+        <div class="card-header">
+          <span>Daftar Pegawai</span>
+          <button class="btn-primary" onclick="openModalPegawai()">+ Tambah Pegawai</button>
+        </div>
+        <div class="filter-row">
+          <input type="text" id="search-pegawai" placeholder="Cari nama / NIP..." oninput="renderPegawai()" class="inp-search">
+          <select id="filter-golongan" onchange="renderPegawai()"><option value="">Semua Golongan</option><option value="PNS">PNS</option><option value="PPPK">PPPK</option></select>
+          <select id="filter-unit" onchange="renderPegawai()"><option value="">Semua Unit</option></select>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>No</th><th>NIP</th><th>Nama</th><th>Gol.</th><th>Jabatan</th><th>Unit</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="pegawai-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- IZIN & CUTI -->
+    <section id="section-izin-cuti" class="section">
+      <div class="section-title">📅 Izin &amp; Cuti</div>
+      <div class="card">
+        <div class="card-header"><span class="pegawai-only">➕ Ajukan Permohonan</span><span class="admin-only" style="display:none">📋 Semua Permohonan</span></div>
+        <div class="pegawai-only" id="form-izincuti">
+          <div class="form-grid">
+            <div class="form-group"><label>Jenis *</label>
+              <select id="ic-jenis"><option value="Izin">Izin</option><option value="Cuti">Cuti Tahunan</option><option value="Cuti Sakit">Cuti Sakit</option><option value="Cuti Melahirkan">Cuti Melahirkan</option><option value="Cuti Alasan Penting">Cuti Alasan Penting</option></select>
+            </div>
+            <div class="form-group"><label>Tanggal Mulai *</label><input type="date" id="ic-mulai"></div>
+            <div class="form-group"><label>Tanggal Selesai *</label><input type="date" id="ic-selesai"></div>
+            <div class="form-group"><label>Alasan *</label><input type="text" id="ic-alasan" placeholder="Jelaskan keperluan izin/cuti"></div>
+          </div>
+          <div class="form-group">
+            <label>Upload Dokumen Pendukung</label>
+            <div class="upload-zone" onclick="document.getElementById('ic-file').click()">
+              <div class="upload-icon">📎</div>
+              <div class="upload-text">Klik untuk pilih file<br><small>PDF, JPG, PNG – maks. 5 MB</small></div>
+              <input type="file" id="ic-file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect('ic-file','ic-filename')">
+            </div>
+            <div id="ic-filename" class="file-name-display hidden"></div>
+          </div>
+          <div class="form-group">
+            <label>Google Apps Script URL (opsional)</label>
+            <input type="text" id="ic-gdrive-url" placeholder="https://script.google.com/macros/s/xxxx/exec">
+            <small class="field-hint">Isi URL agar dokumen tersimpan otomatis di Google Drive</small>
+          </div>
+          <button class="btn-primary" onclick="submitIzinCuti()">📤 Ajukan Permohonan</button>
+          <div id="ic-msg" class="absen-msg hidden mt1"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span>Riwayat Izin &amp; Cuti</span></div>
+        <div class="filter-row admin-only" id="ic-admin-filter" style="display:none">
+          <select id="ic-filter-pegawai" onchange="renderIzinCuti()"><option value="">Semua Pegawai</option></select>
+          <select id="ic-filter-status" onchange="renderIzinCuti()"><option value="">Semua Status</option><option value="Menunggu">Menunggu</option><option value="Disetujui">Disetujui</option><option value="Ditolak">Ditolak</option></select>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>No</th><th class="th-admin-ic">Pegawai</th><th>Jenis</th><th>Mulai</th><th>Selesai</th><th>Hari</th><th>Alasan</th><th>Dokumen</th><th>Status</th><th class="th-admin-ic">Aksi Admin</th></tr></thead>
+            <tbody id="izincuti-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOKUMEN KEGIATAN -->
+    <section id="section-dokumen" class="section">
+      <div class="section-title">📁 Dokumen Hasil Kegiatan</div>
+      <div class="card">
+        <div class="card-header"><span class="pegawai-only">➕ Upload Dokumen</span><span class="admin-only" style="display:none">📋 Semua Dokumen Pegawai</span></div>
+        <div class="pegawai-only" id="form-dokumen">
+          <div class="form-grid">
+            <div class="form-group"><label>Judul Kegiatan *</label><input type="text" id="dok-judul" placeholder="Nama / judul kegiatan"></div>
+            <div class="form-group"><label>Tanggal *</label><input type="date" id="dok-tanggal"></div>
+            <div class="form-group"><label>Jenis</label>
+              <select id="dok-jenis"><option value="Rapat">Rapat</option><option value="Pelatihan">Pelatihan</option><option value="Perjalanan Dinas">Perjalanan Dinas</option><option value="Sosialisasi">Sosialisasi</option><option value="Koordinasi">Koordinasi</option><option value="Lainnya">Lainnya</option></select>
+            </div>
+            <div class="form-group"><label>Keterangan</label><input type="text" id="dok-ket" placeholder="Keterangan tambahan"></div>
+          </div>
+          <div class="form-group">
+            <label>Upload Dokumen *</label>
+            <div class="upload-zone" onclick="document.getElementById('dok-file').click()">
+              <div class="upload-icon">📄</div>
+              <div class="upload-text">Klik untuk pilih file<br><small>PDF, JPG, PNG, DOC, DOCX</small></div>
+              <input type="file" id="dok-file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none" onchange="handleFileSelect('dok-file','dok-filename')">
+            </div>
+            <div id="dok-filename" class="file-name-display hidden"></div>
+          </div>
+          <div class="form-group">
+            <label>Google Apps Script URL (opsional)</label>
+            <input type="text" id="dok-gdrive-url" placeholder="https://script.google.com/macros/s/xxxx/exec">
+          </div>
+          <button class="btn-primary" onclick="submitDokumen()">📤 Upload &amp; Simpan</button>
+          <div id="dok-msg" class="absen-msg hidden mt1"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span>Dokumen Kegiatan</span></div>
+        <div class="filter-row admin-only" id="dok-admin-filter" style="display:none">
+          <select id="dok-filter-pegawai" onchange="renderDokumen()"><option value="">Semua Pegawai</option></select>
+          <select id="dok-filter-jenis" onchange="renderDokumen()"><option value="">Semua Jenis</option><option value="Rapat">Rapat</option><option value="Pelatihan">Pelatihan</option><option value="Perjalanan Dinas">Perjalanan Dinas</option><option value="Sosialisasi">Sosialisasi</option><option value="Koordinasi">Koordinasi</option><option value="Lainnya">Lainnya</option></select>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>No</th><th class="th-admin-dok">Pegawai</th><th>Judul</th><th>Jenis</th><th>Tanggal</th><th>Keterangan</th><th>File</th><th>Drive</th><th>Tgl Upload</th></tr></thead>
+            <tbody id="dokumen-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAPORAN -->
+    <section id="section-laporan" class="section">
+      <div class="section-title">📊 Laporan Presensi</div>
+      <div class="card">
+        <div class="card-header"><span>Filter Laporan</span></div>
+        <div class="filter-row">
+          <select id="lap-bulan"><option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option><option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option><option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option></select>
+          <select id="lap-tahun"></select>
+          <select id="lap-pegawai-filter" class="admin-only"><option value="">Semua Pegawai</option></select>
+          <button class="btn-primary" onclick="generateLaporan()">📊 Generate</button>
+          <button class="btn-outline" onclick="exportCSV()">📥 Export CSV</button>
+          <button class="btn-google admin-only" onclick="sendToGoogleDrive()">📤 Google Drive</button>
+        </div>
+      </div>
+      <div class="card" id="laporan-result" style="display:none">
+        <div class="card-header"><span id="lap-title">Laporan Presensi</span></div>
+        <div class="stats-grid mb1" id="lap-stats"></div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead id="laporan-thead"></thead>
+            <tbody id="laporan-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFIL -->
+    <section id="section-profil" class="section">
+      <div class="section-title">👤 Profil Saya</div>
+      <div class="profil-grid">
+        <div class="card profil-card">
+          <div class="profil-avatar-wrap">
+            <label class="avatar-upload-btn" title="Klik untuk ganti foto profil">
+              <img id="profil-avatar" src="" alt="avatar" class="profil-avatar">
+              <span class="avatar-hover">📷 Ganti Foto</span>
+              <input type="file" id="profil-foto-input" accept="image/*" style="display:none" onchange="gantiAvatar(event,'profil')">
+            </label>
+            <div class="profil-name" id="profil-name">-</div>
+            <div class="profil-role" id="profil-role">-</div>
+            <button onclick="document.getElementById('profil-foto-input').click()" class="btn-outline" style="margin-top:.5rem;font-size:.78rem;padding:.4rem .9rem">📷 Ganti Foto Profil</button>
+          </div>
+          <div class="profil-info">
+            <div class="info-row"><span>NIP</span><span id="p-nip">-</span></div>
+            <div class="info-row"><span>Golongan</span><span id="p-gol">-</span></div>
+            <div class="info-row"><span>Jabatan</span><span id="p-jabatan">-</span></div>
+            <div class="info-row"><span>Unit Kerja</span><span id="p-unit">-</span></div>
+            <div class="info-row"><span>Email</span><span id="p-email">-</span></div>
+          </div>
+          <button class="btn-logout-profil full mt1" onclick="doLogout()">⏏ Keluar dari Sistem</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><span>🔒 Ganti Password</span></div>
+          <div class="form-group"><label>Password Lama</label><input type="password" id="pw-lama" placeholder="Password saat ini"></div>
+          <div class="form-group"><label>Password Baru</label><input type="password" id="pw-baru" placeholder="Min. 6 karakter"></div>
+          <div class="form-group"><label>Konfirmasi Password Baru</label><input type="password" id="pw-konfirm" placeholder="Ulangi password baru"></div>
+          <button class="btn-primary full" onclick="gantiPassword()">💾 Simpan Password Baru</button>
+          <div id="pw-msg" class="absen-msg hidden mt1"></div>
+        </div>
+        <!-- CARD CLOUD CONFIG - hanya admin -->
+        <div class="card admin-only" id="card-cloud-config" style="display:none">
+          <div class="card-header"><span>☁️ Konfigurasi Cloud (Admin)</span><span id="cloud-profil-badge" class="badge badge-gray">Lokal</span></div>
+          <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6">
+            API Key &amp; Bin ID dari <a href="https://jsonbin.io" target="_blank" style="color:var(--blue)">JSONBin.io</a> disimpan di sini.
+            Setelah tersimpan, <b>semua pegawai langsung bisa login tanpa perlu setup cloud</b>.
+          </p>
+          <div class="form-group">
+            <label>API Key JSONBin.io</label>
+            <input type="password" id="profil-apikey" placeholder="$2a$10$xxxxxxxxxx..." autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label>Bin ID</label>
+            <input type="text" id="profil-binid" placeholder="6xxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+          </div>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+            <button class="btn-primary" onclick="saveCloudFromProfil()" style="flex:1">💾 Simpan &amp; Hubungkan Cloud</button>
+            <button class="btn-outline" onclick="copyRelayLink()" id="btn-copy-relay" style="flex:1;display:none">🔗 Salin Link Akses</button>
+          </div>
+          <div id="cloud-profil-msg" class="absen-msg hidden mt1"></div>
+          <div class="mt1" style="background:#f0f7ff;border-radius:8px;padding:.75rem;font-size:.75rem;color:#1565c0;line-height:1.7">
+            <b>💡 Cara kerja:</b><br>
+            1. Admin isi API Key &amp; Bin ID → klik Simpan<br>
+            2. Sistem menyimpan konfigurasi ke cloud<br>
+            3. Pegawai buka link aplikasi → langsung login tanpa setup apapun<br>
+            4. Atau bagikan "Link Akses" ke pegawai agar otomatis terhubung
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL: TAMBAH/EDIT PEGAWAI -->
+<div id="modal-pegawai" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-pegawai-title">Tambah Pegawai</span>
+      <button onclick="closeModalPegawai()" class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pegawai-id">
+      <!-- FOTO PROFIL MODAL -->
+      <div class="modal-avatar-row">
+        <img id="modal-avatar-img" src="" alt="avatar" class="modal-avatar-img">
+        <div class="modal-avatar-btns">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:.3rem">📷 Foto Profil</div>
+          <label class="btn-upload-foto">
+            Upload Foto
+            <input type="file" id="modal-foto-input" accept="image/*" style="display:none" onchange="gantiAvatar(event,'modal')">
+          </label>
+          <button class="btn-reset-foto" onclick="resetAvatarModal()">↺ Reset Default</button>
+          <small style="color:var(--text-muted);font-size:.7rem">JPG/PNG maks 1MB</small>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>NIP *</label><input type="text" id="f-nip" placeholder="Nomor Induk Pegawai"></div>
+        <div class="form-group"><label>Nama Lengkap *</label><input type="text" id="f-nama" placeholder="Nama lengkap" oninput="updateModalAvatarDefault()"></div>
+        <div class="form-group"><label>Golongan *</label><select id="f-golongan" onchange="updateModalAvatarDefault()"><option value="PNS">PNS</option><option value="PPPK">PPPK</option></select></div>
+        <div class="form-group"><label>Pangkat/Gol. Ruang</label>
+          <select id="f-pangkat"><option value="">-- Pilih --</option><option value="Ia">Ia</option><option value="Ib">Ib</option><option value="Ic">Ic</option><option value="Id">Id</option><option value="IIa">IIa</option><option value="IIb">IIb</option><option value="IIc">IIc</option><option value="IId">IId</option><option value="IIIa">IIIa - Penata Muda</option><option value="IIIb">IIIb - Penata Muda Tk.I</option><option value="IIIc">IIIc - Penata</option><option value="IIId">IIId - Penata Tk.I</option><option value="IVa">IVa - Pembina</option><option value="IVb">IVb - Pembina Tk.I</option><option value="IVc">IVc</option><option value="IVd">IVd</option><option value="IVe">IVe</option></select>
+        </div>
+        <div class="form-group"><label>Jabatan *</label><input type="text" id="f-jabatan" placeholder="Jabatan pegawai"></div>
+        <div class="form-group"><label>Unit Kerja *</label><input type="text" id="f-unit" placeholder="Unit kerja / bidang"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="f-email" placeholder="email@kpu.go.id"></div>
+        <div class="form-group"><label>No. HP</label><input type="text" id="f-hp" placeholder="08xx-xxxx-xxxx"></div>
+        <div class="form-group"><label>Username</label><input type="text" id="f-username" placeholder="Username login"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="f-password" placeholder="Kosongkan jika tidak diubah"></div>
+        <div class="form-group"><label>Status</label><select id="f-status"><option value="Aktif">Aktif</option><option value="Tidak Aktif">Tidak Aktif</option></select></div>
+        <div class="form-group"><label>Role</label><select id="f-role"><option value="pegawai">Pegawai</option><option value="admin">Admin</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModalPegawai()">Batal</button>
+      <button class="btn-primary" onclick="savePegawai()">💾 Simpan Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GOOGLE DRIVE -->
+<div id="modal-gdrive" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header"><span>📤 Kirim Laporan ke Google Drive</span><button onclick="closeGDrive()" class="modal-close">✕</button></div>
+    <div class="modal-body">
+      <div class="gdrive-info"><div class="gdrive-icon">📁</div><p>Laporan akan dikirimkan ke Google Drive melalui Apps Script.</p><p class="gdrive-note">⚠️ Masukkan URL Google Apps Script Web App Anda:</p></div>
+      <div class="form-group"><label>Google Apps Script URL</label><input type="text" id="gdrive-url" placeholder="https://script.google.com/macros/s/xxxx/exec"></div>
+      <div class="form-group"><label>Nama File di Drive</label><input type="text" id="gdrive-filename" value="Laporan_Absensi_KPU.csv"></div>
+      <div class="info-box-blue"><b>📋 Cara Setup:</b><ol><li>Buka <b>script.google.com</b> → Project Baru</li><li>Paste kode google-apps-script.js</li><li>Deploy → Web App → Who has access: <b>Anyone</b></li><li>Salin URL deployment &amp; tempel di atas</li></ol></div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeGDrive()">Batal</button><button class="btn-google" onclick="kirimGDrive()">📤 Kirim Sekarang</button></div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  SIAP KPU – Full Application Logic
+//  Cloud Storage: JSONBin.io (gratis, lintas browser)
+//  GitHub Pages Ready: Simpan sebagai index.html
+// ═══════════════════════════════════════════════════════════════════
+
+// ── CLOUD CONFIG ──
+// API Key & Bin ID HANYA disimpan oleh admin di browser admin.
+// Browser pegawai/baru: cukup login → sistem otomatis pakai cloud dari cache lokal (jika pernah sync)
+// atau gunakan relay: saat login berhasil, cloud config tersimpan dari data user cloud.
+const CLOUD = {
+  get apiKey() { return localStorage.getItem('siap_jb_apikey') || ''; },
+  get binId()  { return localStorage.getItem('siap_jb_binid') || ''; },
+  get enabled(){ return !!(this.apiKey && this.binId); },
+  BASE: 'https://api.jsonbin.io/v3/b'
+};
+
+// ── LOCAL FALLBACK DB ──
+const LDB = {
+  get: (k)  => { try{return JSON.parse(localStorage.getItem('siap_'+k))}catch{return null} },
+  set: (k,v)=> { localStorage.setItem('siap_'+k, JSON.stringify(v)); return v; },
+  del: (k)  => localStorage.removeItem('siap_'+k)
+};
+
+// ── CLOUD READ/WRITE ──
+let _cloudCache = null;
+
+async function cloudRead() {
+  if (!CLOUD.enabled) return null;
+  try {
+    const r = await fetch(`${CLOUD.BASE}/${CLOUD.binId}/latest`, {
+      headers: { 'X-Master-Key': CLOUD.apiKey, 'X-Bin-Meta': 'false' }
+    });
+    if (!r.ok) {
+      console.warn('JSONBin read failed:', r.status, r.statusText);
+      return null;
+    }
+    const json = await r.json();
+    // JSONBin v3: data wrapped in { record: {...} }
+    // JSONBin v2: data directly as object
+    const data = json.record !== undefined ? json.record : json;
+    // Validate it's our app data
+    if (!data || typeof data !== 'object' || !Array.isArray(data.users)) return null;
+    return data;
+  } catch(e) {
+    console.warn('cloudRead error:', e);
+    return null;
+  }
+}
+
+async function cloudWrite(data) {
+  if (!CLOUD.enabled) return false;
+  try {
+    const r = await fetch(`${CLOUD.BASE}/${CLOUD.binId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': CLOUD.apiKey },
+      body: JSON.stringify(data)
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+
+// ── UNIFIED DB ──
+async function dbLoad() {
+  if (CLOUD.enabled) {
+    syncShow('Memuat data cloud...', 'loading');
+    const data = await cloudRead();
+    if (data) { syncShow('✅ Data cloud dimuat', 'success'); return data; }
+    syncShow('⚠️ Gagal load cloud, pakai lokal', 'error');
+  }
+  // Fallback local
+  return {
+    users:    LDB.get('users')   || [],
+    absensi:  LDB.get('absensi') || [],
+    izincuti: LDB.get('izincuti')|| [],
+    dokumen:  LDB.get('dokumen') || []
+  };
+}
+
+async function dbSave(data) {
+  if (!data || typeof data !== 'object') return false;
+  // Ensure all keys exist
+  data.users    = data.users    || [];
+  data.absensi  = data.absensi  || [];
+  data.izincuti = data.izincuti || [];
+  data.dokumen  = data.dokumen  || [];
+  data._meta    = data._meta    || {};
+
+  // Always save locally
+  LDB.set('users',    data.users);
+  LDB.set('absensi',  data.absensi);
+  LDB.set('izincuti', data.izincuti);
+  LDB.set('dokumen',  data.dokumen);
+  LDB.set('_meta',    data._meta);
+  _cloudCache = data;
+
+  if (CLOUD.enabled) {
+    syncShow('Menyimpan ke cloud...', 'loading');
+    const ok = await cloudWrite(data);
+    if (ok) syncShow('☁️ Tersimpan di cloud', 'success');
+    else    syncShow('⚠️ Cloud gagal, tersimpan lokal', 'error');
+    return ok;
+  }
+  return true;
+}
+
+// Shortcut: get single collection
+async function dbGet(key) {
+  if (_cloudCache) return _cloudCache[key] || [];
+  const data = await dbLoad();
+  _cloudCache = data;
+  return data[key] || [];
+}
+
+// Shortcut: update single collection and save all
+async function dbSet(key, value) {
+  if (!_cloudCache) { _cloudCache = await dbLoad(); }
+  _cloudCache[key] = value;
+  await dbSave(_cloudCache);
+  return value;
+}
+
+// ── SYNC UI ──
+function syncShow(msg, type='loading') {
+  const strip = document.getElementById('sync-strip');
+  const dot   = document.getElementById('sd');
+  const text  = document.getElementById('st');
+  if (!strip) return;
+  strip.className = `sync-strip show ${type}`;
+  dot.style.animation = type==='loading' ? 'blink .8s infinite' : 'none';
+  text.textContent = msg;
+  if (type !== 'loading') setTimeout(()=>{ strip.classList.remove('show'); }, 2200);
+}
+
+// ── CLOUD SETUP UI ──
+function showCloudSetup() {
+  document.getElementById('cloud-setup-panel').style.display = 'block';
+  document.getElementById('login-card').style.display = 'none';
+}
+
+async function saveCloudConfig() {
+  const key = document.getElementById('setup-apikey').value.trim();
+  const bin = document.getElementById('setup-binid').value.trim();
+  if (!key || !bin) { alert('Isi API Key dan Bin ID terlebih dahulu'); return; }
+  // Simpan sementara untuk test koneksi
+  localStorage.setItem('siap_jb_apikey', key);
+  localStorage.setItem('siap_jb_binid', bin);
+  _cloudCache = null;
+  // Verifikasi koneksi ke JSONBin
+  const btn = document.querySelector('.btn-cloud');
+  if (btn) { btn.textContent = '⏳ Memeriksa koneksi...'; btn.disabled = true; }
+  const testRead = await cloudRead();
+  if (btn) { btn.textContent = '💾 Simpan & Gunakan Cloud'; btn.disabled = false; }
+  if (testRead === null) {
+    // Bin mungkin kosong (baru dibuat) – coba init seed
+    const seedData = { users:SEED_USERS, absensi:mkAbsensiSeed(), izincuti:[], dokumen:[], _meta:{cloudKey:key,cloudBin:bin} };
+    const ok = await cloudWrite(seedData);
+    if (!ok) {
+      alert('❌ Gagal terhubung ke JSONBin. Periksa API Key dan Bin ID, lalu coba lagi.');
+      localStorage.removeItem('siap_jb_apikey');
+      localStorage.removeItem('siap_jb_binid');
+      return;
+    }
+    _cloudCache = seedData;
+  } else {
+    // Simpan relay key ke cloud agar browser lain bisa auto-connect
+    testRead._meta = testRead._meta || {};
+    testRead._meta.cloudKey = key;
+    testRead._meta.cloudBin = bin;
+    await cloudWrite(testRead);
+    _cloudCache = testRead;
+  }
+  // Tandai setup sudah selesai di browser ini
+  LDB.set('cloud_setup_done', '1');
+  document.getElementById('cloud-setup-panel').style.display = 'none';
+  document.getElementById('login-card').style.display = 'block';
+  updateCloudStatusUI();
+  syncShow('☁️ Cloud berhasil terhubung!', 'success');
+  showToast('✅ Konfigurasi cloud tersimpan. Pegawai bisa langsung login!');
+}
+
+function useLocalMode() {
+  // Tandai bahwa pengguna sudah memilih mode lokal – tidak tampil lagi
+  LDB.set('cloud_setup_done', '1');
+  document.getElementById('cloud-setup-panel').style.display = 'none';
+  document.getElementById('login-card').style.display = 'block';
+  updateCloudStatusUI();
+}
+
+function updateCloudStatusUI() {
+  const bar = document.getElementById('cloud-status-login');
+  const icon = document.getElementById('cloud-status-icon');
+  const text = document.getElementById('cloud-status-text');
+  const btnCloud = document.getElementById('btn-atur-cloud');
+  if (!bar) return;
+  bar.style.display = '';
+  if (CLOUD.enabled) {
+    bar.className = 'cloud-status-bar online';
+    icon.textContent = '☁️';
+    text.textContent = 'Cloud terhubung – data tersinkronisasi';
+    if (btnCloud) btnCloud.textContent = '⚙ Ubah';
+  } else {
+    bar.className = 'cloud-status-bar local';
+    icon.textContent = '💻';
+    text.textContent = 'Mode Lokal – data hanya di browser ini';
+    if (btnCloud) btnCloud.textContent = '⚙ Atur Cloud';
+  }
+}
+
+function resetCloudSetup() {
+  LDB.del('cloud_setup_done');
+  localStorage.removeItem('siap_jb_apikey');
+  localStorage.removeItem('siap_jb_binid');
+  _cloudCache = null;
+  showCloudSetup();
+  updateCloudStatusUI();
+  showToast('🔧 Silakan masukkan konfigurasi cloud baru');
+}
+
+// Buat link relay untuk di-share ke pegawai (berisi key terenkripsi)
+function copyRelayLink() {
+  if (!CLOUD.enabled) { showToast('⚠️ Cloud belum dikonfigurasi'); return; }
+  const relay = btoa(CLOUD.apiKey + '|' + CLOUD.binId);
+  const url = window.location.origin + window.location.pathname + '#cloud=' + relay;
+  navigator.clipboard.writeText(url).then(()=>{
+    showToast('✅ Link relay cloud berhasil disalin! Bagikan ke pegawai agar langsung terhubung cloud.');
+  }).catch(()=>{
+    prompt('Salin link berikut dan bagikan ke pegawai:', url);
+  });
+}
+
+// ── SEED DATA ──
+const SEED_USERS = [
+  { id:'u1', nip:'198501012010011001', nama:'Administrator KPU', golongan:'PNS', pangkat:'IVa',
+    jabatan:'Administrator Sistem', unit:'Sekretariat', email:'admin@kpu.go.id', hp:'08111111111',
+    username:'admin', password:'admin123', role:'admin', status:'Aktif',
+    avatar:'https://ui-avatars.com/api/?name=Admin+KPU&background=c62828&color=fff&size=80' },
+  { id:'u2', nip:'199001012015032001', nama:'Sri Tutut', golongan:'PNS', pangkat:'IIIa',
+    jabatan:'Pranata Komputer', unit:'Bagian TI', email:'sritutut@kpu.go.id', hp:'08222222222',
+    username:'pegawai', password:'pegawai123', role:'pegawai', status:'Aktif',
+    avatar:'https://ui-avatars.com/api/?name=Sri+Tutut&background=1565c0&color=fff&size=80' },
+  { id:'u3', nip:'199503152019081001', nama:'Budi Santoso', golongan:'PPPK', pangkat:'IIIb',
+    jabatan:'Analis Kebijakan', unit:'Divisi Perencanaan', email:'budi@kpu.go.id', hp:'08333333333',
+    username:'budi', password:'budi123', role:'pegawai', status:'Aktif',
+    avatar:'https://ui-avatars.com/api/?name=Budi+Santoso&background=2e7d32&color=fff&size=80' },
+  { id:'u4', nip:'198808202012042002', nama:'Dewi Rahayu', golongan:'PNS', pangkat:'IIIb',
+    jabatan:'Pengelola Keuangan', unit:'Bagian Keuangan', email:'dewi@kpu.go.id', hp:'08444444444',
+    username:'dewi', password:'dewi123', role:'pegawai', status:'Aktif',
+    avatar:'https://ui-avatars.com/api/?name=Dewi+Rahayu&background=6a1b9a&color=fff&size=80' }
+];
+
+function mkAbsensiSeed() {
+  const abs = []; const now = new Date();
+  for (let i=1; i<now.getDate(); i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), i);
+    if (d.getDay()===0||d.getDay()===6) continue;
+    const ds = fmtDate(d);
+    ['u2','u3','u4'].forEach(uid=>{
+      const mm = Math.floor(Math.random()*20+30);
+      abs.push({ id:`abs_${uid}_${ds}`, userId:uid, tanggal:ds,
+        masuk:`7:${String(mm).padStart(2,'0')}`, siang:'12:00',
+        pulang:`16:${String(Math.floor(Math.random()*30+30)).padStart(2,'0')}`,
+        status: mm>45?'Terlambat':'Hadir', catatan:'',
+        lat:-2.9761+(Math.random()-.5)*.01, lon:104.7754+(Math.random()-.5)*.01 });
+    });
+  }
+  return abs;
+}
+
+async function initDB() {
+  syncShow('Inisialisasi...', 'loading');
+
+  // Jika cloud sudah dikonfigurasi di browser ini → pakai langsung
+  if (CLOUD.enabled) {
+    syncShow('Menghubungi cloud...', 'loading');
+    const cloudData = await cloudRead();
+    if (cloudData) {
+      _cloudCache = cloudData;
+      LDB.set('users',    cloudData.users);
+      LDB.set('absensi',  cloudData.absensi);
+      LDB.set('izincuti', cloudData.izincuti);
+      LDB.set('dokumen',  cloudData.dokumen);
+      // Simpan relay key lokal jika ada di cloud meta
+      if (cloudData._meta && cloudData._meta.cloudKey && cloudData._meta.cloudBin) {
+        localStorage.setItem('siap_jb_apikey', cloudData._meta.cloudKey);
+        localStorage.setItem('siap_jb_binid',  cloudData._meta.cloudBin);
+      }
+      syncShow('✅ Data cloud dimuat', 'success');
+      return;
+    }
+    syncShow('⚠️ Cloud kosong, upload seed data...', 'loading');
+    const seedData = { users:SEED_USERS, absensi:mkAbsensiSeed(), izincuti:[], dokumen:[], _meta:{} };
+    _cloudCache = seedData;
+    const saved = await dbSave(seedData);
+    syncShow(saved ? '✅ Seed data berhasil diupload ke cloud' : '⚠️ Upload cloud gagal, gunakan lokal', saved ? 'success' : 'error');
+    return;
+  }
+
+  // Browser baru / belum ada cloud config → pakai data lokal dulu
+  // Nanti setelah login berhasil, relay key akan di-inject otomatis dari cloud
+  const existing = LDB.get('users');
+  if (!existing || existing.length === 0) {
+    // Coba ambil relay key dari URL hash (untuk share link admin)
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#cloud=')) {
+      try {
+        const parts = atob(hash.slice(7)).split('|');
+        if (parts.length === 2) {
+          localStorage.setItem('siap_jb_apikey', parts[0]);
+          localStorage.setItem('siap_jb_binid',  parts[1]);
+          window.location.hash = '';
+          syncShow('🔗 Relay cloud ditemukan, memuat...', 'loading');
+          const cloudData = await cloudRead();
+          if (cloudData) {
+            _cloudCache = cloudData;
+            LDB.set('users',    cloudData.users);
+            LDB.set('absensi',  cloudData.absensi);
+            LDB.set('izincuti', cloudData.izincuti);
+            LDB.set('dokumen',  cloudData.dokumen);
+            syncShow('✅ Data cloud dimuat via relay', 'success');
+            return;
+          }
+        }
+      } catch(e) {}
+    }
+    // Benar-benar fresh → pakai seed lokal
+    const seedData = { users:SEED_USERS, absensi:mkAbsensiSeed(), izincuti:[], dokumen:[], _meta:{} };
+    _cloudCache = seedData;
+    LDB.set('users',    seedData.users);
+    LDB.set('absensi',  seedData.absensi);
+    LDB.set('izincuti', seedData.izincuti);
+    LDB.set('dokumen',  seedData.dokumen);
+    syncShow('✅ Database lokal siap', 'success');
+  } else {
+    _cloudCache = {
+      users:    LDB.get('users')    || [],
+      absensi:  LDB.get('absensi')  || [],
+      izincuti: LDB.get('izincuti') || [],
+      dokumen:  LDB.get('dokumen')  || [],
+      _meta:    LDB.get('_meta')    || {}
+    };
+    syncShow('✅ Data lokal dimuat', 'success');
+  }
+}
+
+// ── STATE ──
+let currentUser = null;
+let gpsLat = null, gpsLon = null;
+
+// ── UTILS ──
+function fmtDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function formatDate(d) { return fmtDate(d); }
+function formatDateID(d) {
+  const M=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const dt=typeof d==='string'?new Date(d+'T00:00:00'):d;
+  return `${dt.getDate()} ${M[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+function formatDateLong(d) {
+  const M=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const dt=typeof d==='string'?new Date(d+'T00:00:00'):d;
+  return `${dt.getDate()} ${M[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+function getDayID(d){ return ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()]; }
+function todayStr(){ return fmtDate(new Date()); }
+function nowTime(){ const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; }
+function nowDateTime(){ return new Date().toLocaleString('id-ID'); }
+function calcDurasi(m,p){ if(!m||!p)return'—'; const[mh,mm]=m.split(':').map(Number),[ph,pm]=p.split(':').map(Number),d=(ph*60+pm)-(mh*60+mm); return d<=0?'—':`${Math.floor(d/60)}j ${d%60}m`; }
+function diffDays(a,b){ return Math.max(1,Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/(864e5))+1); }
+function showToast(msg,dur=2800){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),dur); }
+function showMsg(el,msg,type){ if(typeof el==='string') el=document.getElementById(el); el.textContent=msg; el.className=`absen-msg ${type}`; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'),4000); }
+function statusBadge(s){ const m={Hadir:'green',Alpha:'red',Izin:'blue',Cuti:'orange',Terlambat:'orange',Menunggu:'yellow',Disetujui:'green',Ditolak:'red'}; return `<span class="badge badge-${m[s]||'gray'}">${s}</span>`; }
+function selfieCell(a){
+  if(!a.selfie||(!a.selfie.masuk&&!a.selfie.siang&&!a.selfie.pulang)) return '<span style="color:var(--text-muted);font-size:.75rem">—</span>';
+  const photos=[];
+  if(a.selfie.masuk)  photos.push(`<img src="${a.selfie.masuk}"  title="Selfie Masuk"  onclick="showSelfieModal(this.src,'Masuk')"  style="width:32px;height:32px;border-radius:6px;object-fit:cover;cursor:pointer;border:2px solid #43a047">`);
+  if(a.selfie.siang)  photos.push(`<img src="${a.selfie.siang}"  title="Selfie Siang"  onclick="showSelfieModal(this.src,'Siang')"  style="width:32px;height:32px;border-radius:6px;object-fit:cover;cursor:pointer;border:2px solid #f9a825">`);
+  if(a.selfie.pulang) photos.push(`<img src="${a.selfie.pulang}" title="Selfie Pulang" onclick="showSelfieModal(this.src,'Pulang')" style="width:32px;height:32px;border-radius:6px;object-fit:cover;cursor:pointer;border:2px solid #e53935">`);
+  return `<div style="display:flex;gap:3px;align-items:center">${photos.join('')}</div>`;
+}
+function showSelfieModal(src, label) {
+  let overlay = document.getElementById('selfie-modal-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'selfie-modal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;backdrop-filter:blur(4px)';
+    overlay.onclick = ()=>overlay.remove();
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:18px;padding:1.25rem 1.5rem;max-width:92vw;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5)">
+      <div style="font-weight:800;font-size:.95rem;margin-bottom:.9rem;color:#1e293b;display:flex;align-items:center;gap:.5rem;justify-content:center">
+        <span>📸</span><span>Foto Selfie Absensi</span>
+      </div>
+      <div style="font-size:.78rem;color:#64748b;margin-bottom:.75rem;font-weight:600">${label||''}</div>
+      <img src="${src}" style="max-width:80vw;max-height:65vh;border-radius:12px;display:block;margin:auto;border:3px solid #e2e8f0">
+      <div style="margin-top:.9rem;font-size:.75rem;color:#94a3b8">Klik di mana saja untuk menutup</div>
+    </div>`;
+  overlay.style.display = 'flex';
+}
+function defaultAvatar(nama,gol){ const bg=gol==='PPPK'?'2e7d32':'1565c0'; return `https://ui-avatars.com/api/?name=${encodeURIComponent(nama||'User')}&background=${bg}&color=fff&size=80`; }
+
+// ── FOTO PROFIL ──
+let _pendingAvatar = ''; // untuk modal pegawai
+
+function gantiAvatar(event, target) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 1.5*1024*1024) { showToast('⚠️ Ukuran foto maksimal 1.5MB'); event.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const b64 = e.target.result;
+    if (target === 'profil') {
+      // Update profil & simpan
+      document.getElementById('profil-avatar').src = b64;
+      document.getElementById('sidebar-avatar').src = b64;
+      syncShow('Menyimpan foto...', 'loading');
+      const users = await dbGet('users');
+      const idx = users.findIndex(u=>u.id===currentUser.id);
+      if (idx>=0) {
+        users[idx].avatar = b64;
+        await dbSet('users', users);
+        currentUser = users[idx];
+        LDB.set('session_user', currentUser);
+        showToast('✅ Foto profil diperbarui!');
+        syncShow('✅ Foto tersimpan di cloud', 'success');
+      }
+    } else if (target === 'modal') {
+      document.getElementById('modal-avatar-img').src = b64;
+      _pendingAvatar = b64;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateModalAvatarDefault() {
+  if (_pendingAvatar) return; // user sudah upload custom
+  const nama = document.getElementById('f-nama').value;
+  const gol  = document.getElementById('f-golongan').value;
+  document.getElementById('modal-avatar-img').src = defaultAvatar(nama, gol);
+}
+
+function resetAvatarModal() {
+  _pendingAvatar = '';
+  const nama = document.getElementById('f-nama').value;
+  const gol  = document.getElementById('f-golongan').value;
+  document.getElementById('modal-avatar-img').src = defaultAvatar(nama, gol);
+}
+
+// ── LOGIN ──
+async function doLogin() {
+  const nip = document.getElementById('login-nip').value.trim();
+  const pw  = document.getElementById('login-pw').value;
+  if (!nip || !pw) { showToast('⚠️ Masukkan NIP/Username dan Password'); return; }
+  syncShow('Memverifikasi...', 'loading');
+
+  // Pastikan cache ada (initDB sudah jalan, tapi jika belum ada karena race)
+  if (!_cloudCache) {
+    if (CLOUD.enabled) {
+      const d = await cloudRead();
+      if (d) _cloudCache = d;
+    }
+    if (!_cloudCache) {
+      _cloudCache = {
+        users:    LDB.get('users')    || [],
+        absensi:  LDB.get('absensi')  || [],
+        izincuti: LDB.get('izincuti') || [],
+        dokumen:  LDB.get('dokumen')  || []
+      };
+    }
+  }
+
+  const users = _cloudCache.users || [];
+  const user = users.find(u =>
+    (u.username === nip || u.nip === nip) &&
+    u.password === pw &&
+    u.status === 'Aktif'
+  );
+
+  if (!user) {
+    document.getElementById('login-error').classList.remove('hidden');
+    syncShow('❌ Login gagal', 'error');
+    console.log('Login gagal. Users tersedia:', users.length, 'Dicari NIP/Username:', nip);
+    return;
+  }
+
+  currentUser = user;
+  LDB.set('session_uid', user.id);
+  LDB.set('session_user', user);
+  document.getElementById('login-error').classList.add('hidden');
+  syncShow('✅ Login berhasil', 'success');
+
+  // AUTO RELAY: Jika cloud belum dikonfigurasi di browser ini,
+  // tapi data cloud punya _meta.cloudKey → inject otomatis (pegawai bisa langsung pakai cloud)
+  if (!CLOUD.enabled && _cloudCache && _cloudCache._meta && _cloudCache._meta.cloudKey) {
+    localStorage.setItem('siap_jb_apikey', _cloudCache._meta.cloudKey);
+    localStorage.setItem('siap_jb_binid',  _cloudCache._meta.cloudBin);
+    LDB.set('cloud_setup_done', '1');
+    // Reload cloud data dengan key baru
+    const freshData = await cloudRead();
+    if (freshData) {
+      _cloudCache = freshData;
+      LDB.set('users',    freshData.users);
+      LDB.set('absensi',  freshData.absensi);
+      LDB.set('izincuti', freshData.izincuti);
+      LDB.set('dokumen',  freshData.dokumen);
+      // Update user dari cloud yang segar
+      const freshUser = freshData.users?.find(u => u.id === user.id);
+      if (freshUser) {
+        currentUser = freshUser;
+        LDB.set('session_user', freshUser);
+      }
+    }
+  }
+
+  enterApp();
+}
+
+function togglePw(){ const i=document.getElementById('login-pw'); i.type=i.type==='password'?'text':'password'; }
+document.getElementById('login-pw').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('login-nip').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+
+// ── SESSION ──
+async function checkSession() {
+  const uid = LDB.get('session_uid');
+  if (uid) {
+    const cached = LDB.get('session_user');
+    if (cached && cached.id === uid) {
+      currentUser = cached;
+      // Refresh in background
+      if (CLOUD.enabled) cloudRead().then(d=>{ if(d){ _cloudCache=d; const u=d.users?.find(x=>x.id===uid); if(u){currentUser=u;LDB.set('session_user',u);} } });
+      else { const users=await dbGet('users'); const u=users.find(x=>x.id===uid); if(u){currentUser=u;LDB.set('session_user',u);} }
+      enterApp(); return;
+    }
+  }
+  // Selalu tampilkan login card langsung — TIDAK pernah auto-show cloud setup
+  // Cloud setup hanya dibuka manual oleh admin via tombol "Atur Cloud"
+  document.getElementById('page-login').classList.add('active');
+  updateCloudStatusUI();
+  // TIDAK ada auto-showCloudSetup() di sini
+}
+
+function enterApp() {
+  document.getElementById('page-login').classList.remove('active');
+  document.getElementById('page-login').classList.add('hidden');
+  document.getElementById('page-app').classList.remove('hidden');
+  document.getElementById('page-app').style.display='flex';
+  document.body.setAttribute('data-role', currentUser.role);
+  const isAdmin = currentUser.role==='admin';
+  const badge = document.getElementById('role-badge');
+  if (badge) { badge.textContent=isAdmin?'⚙ ADMINISTRATOR':'👤 PEGAWAI'; badge.className=`role-badge ${isAdmin?'admin':'pegawai'}`; }
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin?'':'none');
+  document.querySelectorAll('.pegawai-only').forEach(el=>el.style.display=isAdmin?'none':'');
+  if (isAdmin) {
+    document.getElementById('admin-panel').style.display='';
+    document.getElementById('nav-pegawai').style.display='';
+    document.getElementById('ic-admin-filter').style.display='';
+    document.getElementById('dok-admin-filter').style.display='';
+    const fi=document.getElementById('form-izincuti'); if(fi) fi.style.display='none';
+    const fd=document.getElementById('form-dokumen'); if(fd) fd.style.display='none';
+    document.querySelectorAll('.admin-only').forEach(el=>el.style.display='');
+    document.querySelectorAll('.pegawai-only').forEach(el=>el.style.display='none');
+    document.querySelectorAll('.th-admin-ic').forEach(el=>el.style.display='');
+    document.querySelectorAll('.th-admin-dok').forEach(el=>el.style.display='');
+  } else {
+    document.getElementById('admin-panel').style.display='none';
+    document.getElementById('nav-pegawai').style.display='none';
+    document.querySelectorAll('.th-admin-ic').forEach(el=>el.style.display='none');
+    document.querySelectorAll('.th-admin-dok').forEach(el=>el.style.display='none');
+    const qp=document.getElementById('quick-pegawai'); if(qp) qp.style.display='';
+  }
+  loadUserUI();
+  showSection('beranda');
+  startClock();
+  getGPS();
+  populateAllFilters();
+  // Tampilkan tombol relay link untuk admin jika cloud aktif
+  const relayBtn = document.getElementById('btn-relay-link');
+  if (relayBtn) relayBtn.style.display = (currentUser.role==='admin' && CLOUD.enabled) ? '' : 'none';
+  // Tampilkan card cloud config di profil untuk admin
+  const cardCloud = document.getElementById('card-cloud-config');
+  if (cardCloud) cardCloud.style.display = (currentUser.role==='admin') ? '' : 'none';
+}
+
+function doLogout() {
+  if (!confirm('Yakin ingin keluar?')) return;
+  LDB.del('session_uid'); LDB.del('session_user');
+  currentUser=null; _cloudCache=null;
+  document.body.removeAttribute('data-role');
+  document.getElementById('page-app').style.display='none';
+  document.getElementById('page-login').classList.remove('hidden');
+  document.getElementById('page-login').classList.add('active');
+  document.getElementById('login-nip').value='';
+  document.getElementById('login-pw').value='';
+  updateCloudStatusUI();
+}
+
+function loadUserUI() {
+  const u=currentUser;
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  const img=(id,v)=>{ const el=document.getElementById(id); if(el) el.src=v; };
+  set('sidebar-name',u.nama.split(' ')[0]);
+  set('sidebar-role',u.jabatan);
+  img('sidebar-avatar',u.avatar);
+  set('welcome-name',u.nama);
+  set('welcome-unit',`• ${u.jabatan} | ${u.unit}`);
+  set('profil-name',u.nama);
+  set('profil-role',u.jabatan);
+  img('profil-avatar',u.avatar);
+  set('p-nip',u.nip); set('p-gol',u.golongan+(u.pangkat?` (${u.pangkat})`:''));
+  set('p-jabatan',u.jabatan); set('p-unit',u.unit); set('p-email',u.email||'-');
+  loadBerandaStats();
+}
+
+// ── NAVIGATION ──
+const ST={beranda:'Beranda',absensi:'Absensi Kehadiran',pegawai:'Data Pegawai','izin-cuti':'Izin & Cuti',dokumen:'Dokumen Kegiatan',laporan:'Laporan Presensi',profil:'Profil Saya'};
+function showSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const s=document.getElementById('section-'+name); if(s) s.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>{ if(b.getAttribute('onclick')?.includes(`'${name}'`)) b.classList.add('active'); });
+  const tt=document.getElementById('topbar-title'); if(tt) tt.textContent=ST[name]||name;
+  if(name==='absensi') loadAbsensiPage();
+  if(name==='beranda') loadBerandaStats();
+  if(name==='pegawai'&&currentUser.role==='admin'){renderPegawai();populateAllFilters();}
+  if(name==='laporan') initLaporan();
+  if(name==='izin-cuti'){renderIzinCuti();populateAllFilters();}
+  if(name==='dokumen'){renderDokumen();populateAllFilters();}
+  if(name==='profil') loadCloudConfigUI();
+  if(window.innerWidth<640) document.getElementById('sidebar').classList.remove('open');
+}
+function toggleSidebar(){const sb=document.getElementById('sidebar'); if(window.innerWidth<640) sb.classList.toggle('open'); else{sb.classList.toggle('collapsed');document.querySelector('.main-content').classList.toggle('expanded');}}
+
+// ── CLOCK ──
+function startClock(){
+  function tick(){
+    const n=new Date();
+    const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    s('live-clock',`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`);
+    s('live-date',formatDateID(n)); s('w-date',formatDateLong(n)); s('w-day',getDayID(n));
+  } tick(); setInterval(tick,1000);
+}
+
+// ── GPS ──
+function getGPS(){
+  if(!navigator.geolocation){setGPS('Tidak Didukung','red');return;}
+  setGPS('Mendeteksi...','gray');
+  navigator.geolocation.getCurrentPosition(p=>{
+    gpsLat=p.coords.latitude; gpsLon=p.coords.longitude;
+    const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    s('gps-lat',`Latitude: ${gpsLat.toFixed(6)}`); s('gps-lon',`Longitude: ${gpsLon.toFixed(6)}`);
+    s('gps-acc',`Akurasi: ±${Math.round(p.coords.accuracy)} meter`);
+    setGPS('Terdeteksi ✓','green');
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${gpsLat}&lon=${gpsLon}&format=json`)
+      .then(r=>r.json()).then(d=>{const e=document.getElementById('gps-addr');if(e)e.textContent=`Alamat: ${d.display_name}`;})
+      .catch(()=>{const e=document.getElementById('gps-addr');if(e)e.textContent=`Koordinat: ${gpsLat.toFixed(5)}, ${gpsLon.toFixed(5)}`;});
+  },()=>{setGPS('Gagal – Izinkan Akses','red');const e=document.getElementById('gps-addr');if(e)e.textContent='Izinkan akses lokasi di browser Anda';},{enableHighAccuracy:true,timeout:12000});
+}
+function setGPS(txt,type){const el=document.getElementById('gps-status');if(el){el.textContent=txt;el.className=`badge badge-${type}`;}}
+
+// ── ABSENSI ──
+async function getTodayAbsen(){const all=await dbGet('absensi');return all.find(a=>a.userId===currentUser.id&&a.tanggal===todayStr())||null;}
+async function loadAbsensiPage(){
+  const ab=await getTodayAbsen();
+  const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  s('abs-masuk',(ab&&ab.masuk)?ab.masuk:'--:--'); s('abs-siang',(ab&&ab.siang)?ab.siang:'--:--'); s('abs-pulang',(ab&&ab.pulang)?ab.pulang:'--:--');
+  const bm=document.getElementById('btn-masuk');if(bm)bm.disabled=!!ab;
+  const bs=document.getElementById('btn-siang');if(bs)bs.disabled=!ab||!!ab.siang;
+  const bp=document.getElementById('btn-pulang');if(bp)bp.disabled=!ab||!ab.siang||!!ab.pulang;
+  renderRiwayat();
+}
+async function doAbsen(type){
+  const all=await dbGet('absensi'); const now=nowTime(); const cat=document.getElementById('absen-catatan').value;
+  let rec=all.find(a=>a.userId===currentUser.id&&a.tanggal===todayStr());
+  if(!rec){rec={id:`abs_${currentUser.id}_${todayStr()}`,userId:currentUser.id,tanggal:todayStr(),masuk:null,siang:null,pulang:null,status:'Hadir',catatan:'',lat:gpsLat,lon:gpsLon,selfie:{}};all.push(rec);}
+  if(!rec.selfie) rec.selfie={};
+  rec[type]=now; if(cat) rec.catatan=cat;
+  // Simpan foto selfie jika tersedia
+  const selfieData = _selfiePhoto;
+  if(selfieData) {
+    rec.selfie[type] = selfieData;
+    _selfiePhoto = null;
+    // Reset tampilan selfie setelah tersimpan
+    const thumb = document.getElementById('selfie-thumb');
+    if(thumb){ thumb.src=''; thumb.classList.remove('show'); }
+    document.getElementById('btn-open-cam').style.display='';
+    document.getElementById('btn-capture').style.display='none';
+    document.getElementById('btn-retake').style.display='none';
+    document.getElementById('btn-close-cam').style.display='none';
+    document.getElementById('selfie-status').textContent='';
+    document.getElementById('selfie-status').className='selfie-status';
+    document.getElementById('selfie-section').classList.remove('active');
+  }
+  if(rec.masuk){const[h,m]=rec.masuk.split(':').map(Number);rec.status=(h>8||(h===8&&m>0))?'Terlambat':'Hadir';}
+  await dbSet('absensi',all);
+  const L={masuk:'Masuk',siang:'Jam Siang',pulang:'Pulang'};
+  showMsg('absen-msg',`✅ Absen ${L[type]} berhasil: ${now}${selfieData?' 📸':''}` ,'success');
+  showToast(`Absen ${L[type]} pukul ${now}${selfieData?' + foto selfie':''}`);
+  loadAbsensiPage(); loadBerandaStats();
+  closeCamera();
+}
+async function renderRiwayat(){
+  const all=await dbGet('absensi'); const n=new Date(); const pre=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  const data=all.filter(a=>a.userId===currentUser.id&&a.tanggal.startsWith(pre)).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  const tb=document.getElementById('riwayat-body'); if(!tb) return;
+  if(!data.length){tb.innerHTML='<tr><td colspan="5" class="empty-row">Belum ada data absensi bulan ini</td></tr>';return;}
+  tb.innerHTML=data.map(a=>`<tr><td>${formatDateID(a.tanggal)}</td><td class="td-time">${a.masuk||'—'}</td><td class="td-time">${a.siang||'—'}</td><td class="td-time">${a.pulang||'—'}</td><td>${statusBadge(a.status)}</td><td>${selfieCell(a)}</td></tr>`).join('');
+}
+
+// ── BERANDA STATS ──
+async function loadBerandaStats(){
+  const ab=await getTodayAbsen();
+  const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  s('dash-masuk',(ab&&ab.masuk)?ab.masuk:'--:--'); s('dash-siang',(ab&&ab.siang)?ab.siang:'--:--'); s('dash-pulang',(ab&&ab.pulang)?ab.pulang:'--:--');
+  const badge=document.getElementById('today-status-badge');
+  if(badge){if(ab){badge.textContent=ab.status;badge.className=`badge badge-${ab.status==='Hadir'?'green':ab.status==='Terlambat'?'orange':'gray'}`;}else{badge.textContent='Belum Absen';badge.className='badge badge-gray';}}
+  const all=await dbGet('absensi'); const n=new Date(); const pre=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  const mine=all.filter(a=>a.userId===currentUser.id&&a.tanggal.startsWith(pre));
+  s('stat-hadir',mine.filter(a=>a.status==='Hadir'||a.status==='Terlambat').length);
+  s('stat-alpha',mine.filter(a=>a.status==='Alpha').length);
+  const ic=await dbGet('izincuti'); const myIC=ic.filter(x=>x.userId===currentUser.id);
+  s('stat-cuti',myIC.filter(x=>x.jenis.startsWith('Cuti')).length);
+  s('stat-izin',myIC.filter(x=>x.jenis==='Izin').length);
+}
+
+// ═══ DATA PEGAWAI ═══
+async function renderPegawai(){
+  const users=await dbGet('users');
+  const search=(document.getElementById('search-pegawai').value||'').toLowerCase();
+  const gol=document.getElementById('filter-golongan').value;
+  const unit=document.getElementById('filter-unit').value;
+  const f=users.filter(u=>(!search||(u.nama.toLowerCase().includes(search)||u.nip.includes(search)))&&(!gol||u.golongan===gol)&&(!unit||u.unit===unit));
+  const tb=document.getElementById('pegawai-body'); if(!tb) return;
+  if(!f.length){tb.innerHTML='<tr><td colspan="8" class="empty-row">Data tidak ditemukan</td></tr>';return;}
+  tb.innerHTML=f.map((u,i)=>`<tr>
+    <td>${i+1}</td>
+    <td><code style="font-size:.75rem;background:#f1f3f5;padding:.1rem .4rem;border-radius:4px">${u.nip}</code></td>
+    <td><div style="display:flex;align-items:center;gap:.5rem"><img src="${u.avatar}" style="width:28px;height:28px;border-radius:50%;object-fit:cover"><b>${u.nama}</b></div></td>
+    <td><span class="badge badge-${u.golongan==='PNS'?'blue':'orange'}">${u.golongan}</span>${u.pangkat?` <small style="color:var(--text-muted)">(${u.pangkat})</small>`:''}</td>
+    <td>${u.jabatan}</td><td>${u.unit}</td>
+    <td><span class="badge badge-${u.status==='Aktif'?'green':'red'}">${u.status}</span></td>
+    <td style="white-space:nowrap">
+      <button class="btn-outline" style="padding:.28rem .65rem;font-size:.75rem" onclick="editPegawai('${u.id}')">✏️ Edit</button>
+      <button onclick="hapusPegawai('${u.id}')" style="background:#ffebee;color:#b71c1c;border:none;border-radius:6px;padding:.28rem .65rem;font-size:.75rem;cursor:pointer;margin-left:.3rem">🗑</button>
+    </td>
+  </tr>`).join('');
+}
+
+async function populateAllFilters(){
+  const users=await dbGet('users');
+  const units=[...new Set(users.map(u=>u.unit))];
+  const uSel=document.getElementById('filter-unit');
+  if(uSel){const c=uSel.value;uSel.innerHTML='<option value="">Semua Unit</option>'+units.map(u=>`<option value="${u}">${u}</option>`).join('');uSel.value=c;}
+  const ls=document.getElementById('lap-pegawai-filter');if(ls)ls.innerHTML='<option value="">Semua Pegawai</option>'+users.map(u=>`<option value="${u.id}">${u.nama}</option>`).join('');
+  const ics=document.getElementById('ic-filter-pegawai');if(ics)ics.innerHTML='<option value="">Semua Pegawai</option>'+users.map(u=>`<option value="${u.id}">${u.nama}</option>`).join('');
+  const ds=document.getElementById('dok-filter-pegawai');if(ds)ds.innerHTML='<option value="">Semua Pegawai</option>'+users.map(u=>`<option value="${u.id}">${u.nama}</option>`).join('');
+}
+
+async function openModalPegawai(){
+  document.getElementById('pegawai-id').value='';
+  document.getElementById('modal-pegawai-title').textContent='Tambah Pegawai';
+  ['nip','nama','jabatan','unit','email','hp','username'].forEach(f=>{const e=document.getElementById('f-'+f);if(e)e.value='';});
+  document.getElementById('f-password').value='';
+  document.getElementById('f-golongan').value='PNS';
+  document.getElementById('f-pangkat').value='';
+  document.getElementById('f-status').value='Aktif';
+  document.getElementById('f-role').value='pegawai';
+  _pendingAvatar='';
+  document.getElementById('modal-avatar-img').src=defaultAvatar('User','PNS');
+  document.getElementById('modal-pegawai').classList.remove('hidden');
+}
+
+async function editPegawai(id){
+  const users=await dbGet('users'); const u=users.find(x=>x.id===id); if(!u) return;
+  document.getElementById('pegawai-id').value=u.id;
+  document.getElementById('modal-pegawai-title').textContent='Edit Data Pegawai';
+  ['nip','nama','jabatan','unit','email','hp','username'].forEach(f=>{const e=document.getElementById('f-'+f);if(e)e.value=u[f]||'';});
+  document.getElementById('f-password').value='';
+  document.getElementById('f-golongan').value=u.golongan;
+  document.getElementById('f-pangkat').value=u.pangkat||'';
+  document.getElementById('f-status').value=u.status;
+  document.getElementById('f-role').value=u.role;
+  _pendingAvatar='';
+  document.getElementById('modal-avatar-img').src=u.avatar||defaultAvatar(u.nama,u.golongan);
+  document.getElementById('modal-pegawai').classList.remove('hidden');
+}
+
+function closeModalPegawai(){ document.getElementById('modal-pegawai').classList.add('hidden'); }
+
+async function savePegawai(){
+  const nip=document.getElementById('f-nip').value.trim();
+  const nama=document.getElementById('f-nama').value.trim();
+  const jabatan=document.getElementById('f-jabatan').value.trim();
+  const unit=document.getElementById('f-unit').value.trim();
+  if(!nip||!nama){showToast('⚠️ NIP dan Nama wajib diisi');return;}
+  if(!jabatan||!unit){showToast('⚠️ Jabatan dan Unit Kerja wajib diisi');return;}
+
+  const users=await dbGet('users');
+  const editId=document.getElementById('pegawai-id').value;
+  const newPw=document.getElementById('f-password').value;
+  const username=document.getElementById('f-username').value.trim();
+
+  const dupNIP=users.find(u=>u.nip===nip&&u.id!==editId);
+  if(dupNIP){showToast(`⚠️ NIP ${nip} sudah digunakan oleh ${dupNIP.nama}`);return;}
+  if(username){const du=users.find(u=>u.username===username&&u.id!==editId);if(du){showToast(`⚠️ Username "${username}" sudah digunakan`);return;}}
+
+  const fields={nip,nama,golongan:document.getElementById('f-golongan').value,pangkat:document.getElementById('f-pangkat').value,jabatan,unit,email:document.getElementById('f-email').value.trim(),hp:document.getElementById('f-hp').value.trim(),username:username||nip,status:document.getElementById('f-status').value,role:document.getElementById('f-role').value,...(newPw?{password:newPw}:{})};
+
+  syncShow('Menyimpan data pegawai...','loading');
+
+  if(editId){
+    const idx=users.findIndex(u=>u.id===editId);
+    if(idx>=0){
+      const avatar=_pendingAvatar||users[idx].avatar||defaultAvatar(nama,fields.golongan);
+      users[idx]={...users[idx],...fields,avatar};
+      await dbSet('users',users);
+      if(editId===currentUser.id){currentUser={...users[idx]};LDB.set('session_user',currentUser);loadUserUI();}
+      showToast(`✅ Data ${nama} berhasil diperbarui`);
+    }
+  } else {
+    const newId='u'+Date.now();
+    const password=newPw||'kpu123';
+    const avatar=_pendingAvatar||defaultAvatar(nama,fields.golongan);
+    users.push({id:newId,...fields,password,avatar});
+    await dbSet('users',users);
+    showToast(`✅ Pegawai "${nama}" berhasil ditambahkan`);
+    setTimeout(()=>showToast(`🔑 Username: ${fields.username} | Password: ${password}`),2500);
+  }
+  closeModalPegawai(); renderPegawai(); populateAllFilters(); loadBerandaStats();
+}
+
+async function hapusPegawai(id){
+  if(id==='u1'){showToast('❌ Tidak dapat menghapus Administrator');return;}
+  const users=await dbGet('users'); const t=users.find(u=>u.id===id); if(!t) return;
+  if(!confirm(`Yakin hapus pegawai "${t.nama}"?`)) return;
+  syncShow('Menghapus...','loading');
+  await dbSet('users',users.filter(u=>u.id!==id));
+  showToast(`🗑 ${t.nama} berhasil dihapus`);
+  renderPegawai(); populateAllFilters();
+}
+
+async function showAllAbsensi(){
+  const panel=document.getElementById('all-absensi-panel'); panel.classList.toggle('hidden');
+  if(!panel.classList.contains('hidden')){
+    const all=await dbGet('absensi'); const users=await dbGet('users');
+    const tb=document.getElementById('all-absensi-body');
+    const recent=all.slice().sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).slice(0,60);
+    tb.innerHTML=recent.map(a=>{const u=users.find(x=>x.id===a.userId)||{};return`<tr><td><b>${u.nama||'—'}</b></td><td>${formatDateID(a.tanggal)}</td><td class="td-time">${a.masuk||'—'}</td><td class="td-time">${a.siang||'—'}</td><td class="td-time">${a.pulang||'—'}</td><td>${statusBadge(a.status)}</td></tr>`;}).join('');
+  }
+}
+
+// ═══ IZIN & CUTI ═══
+function handleFileSelect(inputId,displayId){
+  const inp=document.getElementById(inputId); const disp=document.getElementById(displayId);
+  if(inp.files&&inp.files[0]){const f=inp.files[0];disp.innerHTML=`📎 ${f.name} <small>(${(f.size/1024).toFixed(1)} KB)</small>`;disp.classList.remove('hidden');}
+}
+function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Gagal membaca file'));r.readAsDataURL(file);});}
+async function uploadToGDrive(url,filename,b64,mime){
+  if(!url||!url.trim()) return null;
+  try{const r=await fetch(url.trim(),{method:'POST',body:JSON.stringify({filename,content:b64,mimeType:mime,isBase64:true}),headers:{'Content-Type':'text/plain'}});const d=await r.json();return d.fileUrl||d.url||null;}catch(e){return null;}
+}
+
+async function submitIzinCuti(){
+  const jenis=document.getElementById('ic-jenis').value;
+  const mulai=document.getElementById('ic-mulai').value;
+  const selesai=document.getElementById('ic-selesai').value;
+  const alasan=document.getElementById('ic-alasan').value.trim();
+  if(!mulai||!selesai||!alasan){showMsg('ic-msg','⚠️ Lengkapi semua field wajib','error');return;}
+  if(selesai<mulai){showMsg('ic-msg','⚠️ Tanggal selesai tidak boleh sebelum tanggal mulai','error');return;}
+  const gdriveUrl=document.getElementById('ic-gdrive-url').value.trim();
+  const fileInp=document.getElementById('ic-file');
+  let driveUrl=null,fileName=null;
+  if(fileInp.files&&fileInp.files[0]){
+    const file=fileInp.files[0]; fileName=file.name;
+    showMsg('ic-msg','⏳ Mengupload...','success');
+    try{const b64=await fileToBase64(file);if(gdriveUrl){driveUrl=await uploadToGDrive(gdriveUrl,`IzinCuti_${currentUser.nama.replace(/\s+/g,'_')}_${mulai}_${fileName}`,b64,file.type);if(driveUrl)showToast('✅ Dokumen dikirim ke Google Drive');}}catch(e){}
+  }
+  syncShow('Menyimpan permohonan...','loading');
+  const ic=await dbGet('izincuti');
+  ic.push({id:'ic'+Date.now(),userId:currentUser.id,jenis,mulai,selesai,hari:diffDays(mulai,selesai),alasan,fileName,driveUrl,status:'Menunggu',tglAjuan:nowDateTime(),catatanAdmin:''});
+  await dbSet('izincuti',ic);
+  document.getElementById('ic-mulai').value=''; document.getElementById('ic-selesai').value=''; document.getElementById('ic-alasan').value=''; document.getElementById('ic-file').value=''; document.getElementById('ic-filename').classList.add('hidden');
+  showMsg('ic-msg',`✅ Permohonan ${jenis} berhasil diajukan.`,'success');
+  showToast(`📅 ${jenis} berhasil diajukan`);
+  renderIzinCuti(); loadBerandaStats();
+}
+
+async function renderIzinCuti(){
+  const isAdmin=currentUser.role==='admin';
+  const ic=await dbGet('izincuti'); const users=await dbGet('users');
+  let data=isAdmin?[...ic]:ic.filter(x=>x.userId===currentUser.id);
+  const fp=isAdmin?(document.getElementById('ic-filter-pegawai')?.value||''):'';
+  const fs=isAdmin?(document.getElementById('ic-filter-status')?.value||''):'';
+  if(fp) data=data.filter(x=>x.userId===fp); if(fs) data=data.filter(x=>x.status===fs);
+  data.sort((a,b)=>b.tglAjuan.localeCompare(a.tglAjuan));
+  const tb=document.getElementById('izincuti-body'); if(!tb) return;
+  if(!data.length){const c=isAdmin?10:8;tb.innerHTML=`<tr><td colspan="${c}" class="empty-row">Tidak ada data</td></tr>`;return;}
+  tb.innerHTML=data.map((x,i)=>{
+    const u=users.find(u=>u.id===x.userId)||{};
+    const dc=x.fileName?(x.driveUrl?`<a href="${x.driveUrl}" target="_blank" class="drive-chip">🔗 Drive</a>`:`<span class="badge badge-gray">📎 Lokal</span>`):'—';
+    const ac=isAdmin?(x.status==='Menunggu'?`<button onclick="approveIC('${x.id}','Disetujui')" class="btn-absen masuk" style="padding:.3rem .65rem;font-size:.72rem;border-radius:6px">✅</button><button onclick="approveIC('${x.id}','Ditolak')" style="background:#ffebee;color:#b71c1c;border:none;border-radius:6px;padding:.3rem .65rem;font-size:.72rem;cursor:pointer;margin-left:.3rem">❌</button>`:`<span style="font-size:.78rem;color:var(--text-muted)">Diproses</span>`):'';
+    return`<tr><td>${i+1}</td>${isAdmin?`<td><b>${u.nama||'—'}</b></td>`:''}<td><span class="badge badge-blue">${x.jenis}</span></td><td>${formatDateID(x.mulai)}</td><td>${formatDateID(x.selesai)}</td><td><span class="durasi-chip">${x.hari} hari</span></td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${x.alasan}</td><td>${dc}</td><td>${statusBadge(x.status)}</td>${isAdmin?`<td style="white-space:nowrap">${ac}</td>`:''}</tr>`;
+  }).join('');
+}
+
+async function approveIC(id,status){
+  syncShow('Memproses...','loading');
+  const ic=await dbGet('izincuti'); const idx=ic.findIndex(x=>x.id===id);
+  if(idx>=0){ic[idx].status=status;ic[idx].tglProses=nowDateTime();}
+  await dbSet('izincuti',ic); renderIzinCuti();
+  showToast(`${status==='Disetujui'?'✅':'❌'} Permohonan ${status.toLowerCase()}`);
+}
+
+// ═══ DOKUMEN ═══
+async function submitDokumen(){
+  const judul=document.getElementById('dok-judul').value.trim();
+  const tanggal=document.getElementById('dok-tanggal').value;
+  if(!judul||!tanggal){showMsg('dok-msg','⚠️ Judul dan tanggal wajib diisi','error');return;}
+  const fileInp=document.getElementById('dok-file');
+  if(!fileInp.files||!fileInp.files[0]){showMsg('dok-msg','⚠️ Pilih file dokumen','error');return;}
+  const file=fileInp.files[0]; const gdriveUrl=document.getElementById('dok-gdrive-url').value.trim(); let driveUrl=null;
+  showMsg('dok-msg','⏳ Mengupload...','success');
+  try{const b64=await fileToBase64(file);if(gdriveUrl){driveUrl=await uploadToGDrive(gdriveUrl,`Kegiatan_${currentUser.nama.replace(/\s+/g,'_')}_${tanggal}_${file.name}`,b64,file.type);if(driveUrl)showToast('✅ Dokumen dikirim ke Google Drive');}}catch(e){}
+  syncShow('Menyimpan...','loading');
+  const dok=await dbGet('dokumen');
+  dok.push({id:'dok'+Date.now(),userId:currentUser.id,judul,tanggal,jenis:document.getElementById('dok-jenis').value,ket:document.getElementById('dok-ket').value,fileName:file.name,fileSize:file.size,driveUrl,tglUpload:nowDateTime()});
+  await dbSet('dokumen',dok);
+  document.getElementById('dok-judul').value=''; document.getElementById('dok-tanggal').value=''; document.getElementById('dok-ket').value=''; document.getElementById('dok-file').value=''; document.getElementById('dok-filename').classList.add('hidden');
+  showMsg('dok-msg','✅ Dokumen berhasil disimpan','success');
+  showToast('📁 Dokumen berhasil diupload');
+  renderDokumen();
+}
+
+async function renderDokumen(){
+  const isAdmin=currentUser.role==='admin';
+  const dok=await dbGet('dokumen'); const users=await dbGet('users');
+  let data=isAdmin?[...dok]:dok.filter(d=>d.userId===currentUser.id);
+  const fp=isAdmin?(document.getElementById('dok-filter-pegawai')?.value||''):'';
+  const fj=isAdmin?(document.getElementById('dok-filter-jenis')?.value||''):'';
+  if(fp) data=data.filter(d=>d.userId===fp); if(fj) data=data.filter(d=>d.jenis===fj);
+  data.sort((a,b)=>b.tglUpload.localeCompare(a.tglUpload));
+  const tb=document.getElementById('dokumen-body'); if(!tb) return;
+  const c=isAdmin?9:8;
+  if(!data.length){tb.innerHTML=`<tr><td colspan="${c}" class="empty-row">Belum ada dokumen</td></tr>`;return;}
+  tb.innerHTML=data.map((d,i)=>{
+    const u=users.find(u=>u.id===d.userId)||{};
+    const fc=d.fileName?`<span style="font-size:.78rem;color:var(--text-muted)">📄 ${d.fileName.length>20?d.fileName.slice(0,18)+'…':d.fileName}</span>`:'—';
+    const dc=d.driveUrl?`<a href="${d.driveUrl}" target="_blank" class="drive-chip">🔗 Drive</a>`:`<span style="font-size:.75rem;color:var(--text-muted)">Tidak ada</span>`;
+    return`<tr><td>${i+1}</td>${isAdmin?`<td><b>${u.nama||'—'}</b></td>`:''}<td><b>${d.judul}</b></td><td><span class="badge badge-blue">${d.jenis}</span></td><td>${formatDateID(d.tanggal)}</td><td style="font-size:.8rem;color:var(--text-muted)">${d.ket||'—'}</td><td>${fc}</td><td>${dc}</td><td style="font-size:.75rem;color:var(--text-muted)">${d.tglUpload}</td></tr>`;
+  }).join('');
+}
+
+// ═══ LAPORAN ═══
+function gpsCell(lat,lon){if(!lat||!lon)return'<span style="color:var(--text-muted);font-size:.78rem">—</span>';const la=parseFloat(lat).toFixed(6),lo=parseFloat(lon).toFixed(6);return`<a href="https://www.google.com/maps?q=${la},${lo}" target="_blank" class="gps-coord-link"><span>📍</span><span class="gps-num">${la}</span><span class="gps-num">${lo}</span></a>`;}
+
+function initLaporan(){
+  const n=new Date(); const lb=document.getElementById('lap-bulan');if(lb) lb.value=n.getMonth()+1;
+  const ySel=document.getElementById('lap-tahun');
+  if(ySel){ySel.innerHTML='';for(let y=n.getFullYear();y>=n.getFullYear()-3;y--)ySel.innerHTML+=`<option value="${y}">${y}</option>`;}
+  populateAllFilters();
+}
+
+async function generateLaporan(){
+  const bulan=parseInt(document.getElementById('lap-bulan').value);
+  const tahun=parseInt(document.getElementById('lap-tahun').value);
+  const pId=document.getElementById('lap-pegawai-filter')?.value||'';
+  const isAdmin=currentUser.role==='admin';
+  const BN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const pre=`${tahun}-${String(bulan).padStart(2,'0')}`;
+  const all=await dbGet('absensi'); const users=await dbGet('users');
+  let data=all.filter(a=>a.tanggal.startsWith(pre));
+  if(!isAdmin) data=data.filter(a=>a.userId===currentUser.id);
+  else if(pId) data=data.filter(a=>a.userId===pId);
+  data.sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+  const lt=document.getElementById('lap-title');if(lt) lt.textContent=isAdmin?`Laporan Presensi – ${BN[bulan-1]} ${tahun}`:`Presensi Saya – ${BN[bulan-1]} ${tahun}`;
+  const hadir=data.filter(a=>a.status==='Hadir'||a.status==='Terlambat').length;
+  const ls=document.getElementById('lap-stats');
+  if(ls) ls.innerHTML=`<div class="stat-card blue"><div class="stat-icon">📋</div><div class="stat-val">${data.length}</div><div class="stat-lbl">Total Record</div></div><div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-val">${hadir}</div><div class="stat-lbl">Hadir</div></div><div class="stat-card orange"><div class="stat-icon">⏰</div><div class="stat-val">${data.filter(a=>a.status==='Terlambat').length}</div><div class="stat-lbl">Terlambat</div></div><div class="stat-card red"><div class="stat-icon">❌</div><div class="stat-val">${data.filter(a=>a.status==='Alpha').length}</div><div class="stat-lbl">Alpha</div></div>`;
+  const thead=document.getElementById('laporan-thead');
+  if(isAdmin&&thead) thead.innerHTML='<tr><th>No</th><th>Foto</th><th>Nama</th><th>Gol.</th><th>Tanggal</th><th>Jam Masuk</th><th>Jam Siang</th><th>Jam Pulang</th><th>Durasi</th><th>GPS</th><th>Status</th></tr>';
+  else if(thead) thead.innerHTML='<tr><th>No</th><th>Foto</th><th>Tanggal</th><th>Jam Masuk</th><th>Jam Siang</th><th>Jam Pulang</th><th>Durasi</th><th>GPS</th><th>Status</th><th>Catatan</th></tr>';
+  const tb=document.getElementById('laporan-body'); const c=isAdmin?11:10;
+  if(!data.length){if(tb)tb.innerHTML=`<tr><td colspan="${c}" class="empty-row">Tidak ada data untuk periode ini</td></tr>`;}
+  else if(tb) tb.innerHTML=data.map((a,i)=>{
+    const u=users.find(u=>u.id===a.userId)||{};
+    // Foto selfie absen masuk (jika ada) untuk ditampilkan di laporan
+    const nm = u.nama||'';
+    const hasSelfie = a.selfie && a.selfie.masuk;
+    const fotoMasuk = hasSelfie
+      ? `<td class="lap-foto-cell"><img src="${a.selfie.masuk}" data-label="Masuk – ${nm.replace(/"/g,'')}" class="selfie-lap-img" title="Foto selfie masuk – klik untuk perbesar"></td>`
+      : `<td class="lap-foto-cell"><span class="lap-foto-empty">📷</span></td>`;
+    return isAdmin
+      ? `<tr><td>${i+1}</td>${fotoMasuk}<td><b>${u.nama||'—'}</b></td><td><span class="badge badge-${u.golongan==='PNS'?'blue':'orange'}">${u.golongan||'—'}</span></td><td>${formatDateID(a.tanggal)}</td><td class="td-time">${a.masuk||'—'}</td><td class="td-time">${a.siang||'—'}</td><td class="td-time">${a.pulang||'—'}</td><td><span class="durasi-chip">${calcDurasi(a.masuk,a.pulang)}</span></td><td>${gpsCell(a.lat,a.lon)}</td><td>${statusBadge(a.status)}</td></tr>`
+      : `<tr><td>${i+1}</td>${fotoMasuk}<td>${formatDateID(a.tanggal)}</td><td class="td-time">${a.masuk||'—'}</td><td class="td-time">${a.siang||'—'}</td><td class="td-time">${a.pulang||'—'}</td><td><span class="durasi-chip">${calcDurasi(a.masuk,a.pulang)}</span></td><td>${gpsCell(a.lat,a.lon)}</td><td>${statusBadge(a.status)}</td><td style="font-size:.78rem;color:var(--text-muted)">${a.catatan||'—'}</td></tr>`;
+  }).join('');
+  const lr=document.getElementById('laporan-result');if(lr) lr.style.display='';
+  window._laporanData=data; window._laporanUsers=users;
+  // Pasang event listener untuk foto selfie di laporan (aman untuk base64)
+  setTimeout(()=>{
+    document.querySelectorAll('.selfie-lap-img').forEach(img=>{
+      img.onclick = function(){ showSelfieModal(this.src, this.dataset.label||'Selfie'); };
+    });
+  }, 50);
+}
+
+function exportCSV(){
+  if(!window._laporanData){showToast('⚠️ Generate laporan terlebih dahulu');return;}
+  const users=window._laporanUsers;
+  const rows=[['No','NIP','Nama','Golongan','Pangkat','Tanggal','Jam Masuk','Jam Siang','Jam Pulang','Durasi','Latitude','Longitude','Status','Catatan']];
+  window._laporanData.forEach((a,i)=>{const u=users.find(x=>x.id===a.userId)||{};rows.push([i+1,u.nip||'',u.nama||'',u.golongan||'',u.pangkat||'',formatDateID(a.tanggal),a.masuk||'',a.siang||'',a.pulang||'',calcDurasi(a.masuk,a.pulang),a.lat?parseFloat(a.lat).toFixed(6):'',a.lon?parseFloat(a.lon).toFixed(6):'',a.status,a.catatan||'']);});
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url; a.download='Laporan_Absensi_KPU.csv'; a.click(); URL.revokeObjectURL(url);
+  showToast('📥 File CSV berhasil diunduh');
+}
+function sendToGoogleDrive(){if(!window._laporanData){showToast('⚠️ Generate laporan terlebih dahulu');return;}document.getElementById('modal-gdrive').classList.remove('hidden');}
+function closeGDrive(){document.getElementById('modal-gdrive').classList.add('hidden');}
+async function kirimGDrive(){
+  const url=document.getElementById('gdrive-url').value.trim();
+  const fn=document.getElementById('gdrive-filename').value.trim()||'Laporan_Absensi_KPU.csv';
+  if(!url){showToast('⚠️ Masukkan URL Apps Script');return;}
+  const users=window._laporanUsers;
+  const rows=[['No','NIP','Nama','Golongan','Tanggal','Jam Masuk','Jam Pulang','Status']];
+  window._laporanData.forEach((a,i)=>{const u=users.find(x=>x.id===a.userId)||{};rows.push([i+1,u.nip||'',u.nama||'',u.golongan||'',formatDateID(a.tanggal),a.masuk||'',a.pulang||'',a.status]);});
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  showToast('📤 Mengirim ke Google Drive...');
+  try{const r=await fetch(url,{method:'POST',body:JSON.stringify({filename:fn,content:csv,mimeType:'text/csv'}),headers:{'Content-Type':'text/plain'}});await r.text();closeGDrive();showToast('✅ Laporan berhasil dikirim ke Google Drive!');}
+  catch(e){showToast('❌ Gagal kirim. Periksa URL Apps Script.');}
+}
+
+// ═══ CLOUD CONFIG DI PROFIL (ADMIN) ═══
+function loadCloudConfigUI() {
+  const card = document.getElementById('card-cloud-config');
+  if (!card) return;
+  const badge = document.getElementById('cloud-profil-badge');
+  const copyBtn = document.getElementById('btn-copy-relay');
+  if (CLOUD.enabled) {
+    if (badge) { badge.textContent = '✅ Terhubung'; badge.className = 'badge badge-green'; }
+    if (copyBtn) copyBtn.style.display = '';
+    // Isi field dengan key yang ada (masked)
+    const apkEl = document.getElementById('profil-apikey');
+    const binEl = document.getElementById('profil-binid');
+    if (apkEl) apkEl.placeholder = CLOUD.apiKey.slice(0,8) + '••••••••••••••••••••';
+    if (binEl) binEl.value = CLOUD.binId;
+  } else {
+    if (badge) { badge.textContent = 'Lokal'; badge.className = 'badge badge-gray'; }
+    if (copyBtn) copyBtn.style.display = 'none';
+  }
+}
+
+async function saveCloudFromProfil() {
+  const keyEl = document.getElementById('profil-apikey');
+  const binEl = document.getElementById('profil-binid');
+  const key = keyEl.value.trim() || CLOUD.apiKey;
+  const bin = binEl.value.trim() || CLOUD.binId;
+  if (!key || !bin) { showMsg('cloud-profil-msg','⚠️ Isi API Key dan Bin ID terlebih dahulu','error'); return; }
+
+  showMsg('cloud-profil-msg','⏳ Menguji koneksi...','success');
+  localStorage.setItem('siap_jb_apikey', key);
+  localStorage.setItem('siap_jb_binid', bin);
+  _cloudCache = null;
+
+  const testRead = await cloudRead();
+  if (testRead === null) {
+    // Bin kosong → upload data saat ini ke cloud
+    const currentData = {
+      users:    LDB.get('users')    || [],
+      absensi:  LDB.get('absensi')  || [],
+      izincuti: LDB.get('izincuti') || [],
+      dokumen:  LDB.get('dokumen')  || [],
+      _meta: { cloudKey: key, cloudBin: bin }
+    };
+    const ok = await cloudWrite(currentData);
+    if (!ok) {
+      showMsg('cloud-profil-msg','❌ Gagal terhubung. Periksa API Key & Bin ID.','error');
+      localStorage.removeItem('siap_jb_apikey');
+      localStorage.removeItem('siap_jb_binid');
+      return;
+    }
+    _cloudCache = currentData;
+  } else {
+    // Simpan relay key ke cloud meta
+    testRead._meta = testRead._meta || {};
+    testRead._meta.cloudKey = key;
+    testRead._meta.cloudBin = bin;
+    await cloudWrite(testRead);
+    _cloudCache = testRead;
+    LDB.set('users',    testRead.users);
+    LDB.set('absensi',  testRead.absensi);
+    LDB.set('izincuti', testRead.izincuti);
+    LDB.set('dokumen',  testRead.dokumen);
+  }
+  LDB.set('cloud_setup_done','1');
+  LDB.set('_meta', { cloudKey: key, cloudBin: bin });
+  keyEl.value = '';
+  showMsg('cloud-profil-msg','✅ Cloud berhasil terhubung! Pegawai bisa langsung login.','success');
+  showToast('☁️ Cloud terhubung! Konfigurasi tersimpan di cloud.');
+  loadCloudConfigUI();
+  updateCloudStatusUI();
+  // Tampilkan tombol relay
+  const relayBtn = document.getElementById('btn-relay-link');
+  if (relayBtn) relayBtn.style.display = '';
+}
+
+// ═══ PASSWORD ═══
+async function gantiPassword(){
+  const lama=document.getElementById('pw-lama').value;
+  const baru=document.getElementById('pw-baru').value;
+  const konfirm=document.getElementById('pw-konfirm').value;
+  const users=await dbGet('users'); const dbUser=users.find(u=>u.id===currentUser.id);
+  const pwCheck=dbUser?dbUser.password:currentUser.password;
+  if(lama!==pwCheck){showMsg('pw-msg','❌ Password lama tidak sesuai','error');return;}
+  if(baru.length<6){showMsg('pw-msg','❌ Password baru minimal 6 karakter','error');return;}
+  if(baru!==konfirm){showMsg('pw-msg','❌ Konfirmasi password tidak cocok','error');return;}
+  const idx=users.findIndex(u=>u.id===currentUser.id);
+  if(idx>=0){users[idx].password=baru;currentUser={...users[idx]};LDB.set('session_user',currentUser);}
+  syncShow('Menyimpan password...','loading');
+  await dbSet('users',users);
+  showMsg('pw-msg','✅ Password berhasil diubah.','success');
+  document.getElementById('pw-lama').value=''; document.getElementById('pw-baru').value=''; document.getElementById('pw-konfirm').value='';
+  showToast('🔒 Password berhasil diperbarui');
+}
+
+
+// ── KAMERA SELFIE ──
+let _cameraStream = null;
+let _selfiePhoto = null;
+
+async function openCamera() {
+  try {
+    const constraints = { video: { facingMode: 'user', width:{ideal:640}, height:{ideal:480} }, audio: false };
+    _cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const video = document.getElementById('selfie-video');
+    video.srcObject = _cameraStream;
+    video.style.display = 'block';
+    const thumb = document.getElementById('selfie-thumb');
+    thumb.classList.remove('show');
+    document.getElementById('btn-open-cam').style.display = 'none';
+    document.getElementById('btn-capture').style.display = '';
+    document.getElementById('btn-retake').style.display = 'none';
+    document.getElementById('btn-close-cam').style.display = '';
+    document.getElementById('selfie-status').textContent = '🎥 Kamera aktif – posisikan wajah Anda';
+    document.getElementById('selfie-status').className = 'selfie-status';
+    document.getElementById('selfie-section').classList.add('active');
+  } catch(e) {
+    let msg = '❌ Tidak bisa akses kamera';
+    if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') msg = '❌ Izin kamera ditolak. Aktifkan di pengaturan browser.';
+    else if (e.name === 'NotFoundError') msg = '❌ Kamera tidak ditemukan di perangkat ini.';
+    document.getElementById('selfie-status').textContent = msg;
+    document.getElementById('selfie-status').className = 'selfie-status err';
+    showToast(msg);
+  }
+}
+
+function capturePhoto() {
+  const video = document.getElementById('selfie-video');
+  const canvas = document.getElementById('selfie-canvas');
+  const w = video.videoWidth || 640;
+  const h = video.videoHeight || 480;
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  // Mirror selfie (tampilan cermin)
+  ctx.save(); ctx.scale(-1, 1); ctx.drawImage(video, -w, 0, w, h); ctx.restore();
+  _selfiePhoto = canvas.toDataURL('image/jpeg', 0.6);
+  // Tampilkan preview
+  const thumb = document.getElementById('selfie-thumb');
+  thumb.src = _selfiePhoto;
+  thumb.classList.add('show');
+  video.style.display = 'none';
+  // Hentikan stream sementara
+  if (_cameraStream) { _cameraStream.getTracks().forEach(t=>t.stop()); _cameraStream=null; }
+  document.getElementById('btn-capture').style.display = 'none';
+  document.getElementById('btn-retake').style.display = '';
+  document.getElementById('btn-close-cam').style.display = '';
+  document.getElementById('selfie-status').textContent = '✅ Foto siap! Tekan tombol absen untuk menyimpan.';
+  document.getElementById('selfie-status').className = 'selfie-status ok';
+}
+
+async function retakePhoto() {
+  _selfiePhoto = null;
+  const thumb = document.getElementById('selfie-thumb');
+  thumb.src = ''; thumb.classList.remove('show');
+  document.getElementById('selfie-status').textContent = '';
+  await openCamera();
+  document.getElementById('btn-retake').style.display = 'none';
+}
+
+function closeCamera() {
+  if (_cameraStream) { _cameraStream.getTracks().forEach(t=>t.stop()); _cameraStream=null; }
+  const video = document.getElementById('selfie-video');
+  video.srcObject = null; video.style.display = 'none';
+  document.getElementById('btn-open-cam').style.display = '';
+  document.getElementById('btn-capture').style.display = 'none';
+  document.getElementById('btn-retake').style.display = 'none';
+  document.getElementById('btn-close-cam').style.display = 'none';
+  const st = document.getElementById('selfie-status');
+  if (st && !_selfiePhoto) { st.textContent = ''; st.className='selfie-status'; }
+  document.getElementById('selfie-section').classList.remove('active');
+}
+
+// ═══ INIT ═══
+(async()=>{
+  await initDB();
+  await checkSession();
+})();
+</script>
+</body>
+</html>
